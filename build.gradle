@@ -2,8 +2,8 @@
 
 buildscript {
     ext {
-        kotlin_version = '1.2.31'
-        plugin_version = '3.1.0'
+        kotlin_version = '1.2.41'
+        plugin_version = '3.1.2'
     }
     repositories {
         jcenter()
@@ -21,12 +21,12 @@ buildscript {
 ext {
     compileSdkVersion = 26
     buildToolsVersion = "26.0.2"
-    supportLibsVersion = '26.1.0'
+    supportLibsVersion = '27.1.1'
     minSdkVersion = 21
-    targetSdkVersion = 26
+    targetSdkVersion = 27
     rxJavaVersion = "1.2.7"
     googlePlayVersion = "10.2.1"
-    daggerVersion = "2.9"
+    daggerVersion = "2.14.1"
     rxJava2Version = "2.1.6"
     timberVersion = "4.6.1"
     espressoVersion = "3.0.1"
