@@ -151,7 +151,8 @@ class OptionsDelegate : ReadOnlyProperty<RootActivity, List<TargetActivity>> {
         return listOf(
                 TargetActivity("Paging Adapter", MainActivity.getCallingIntent(thisRef), thisRef),
                 TargetActivity("Numbers Activity", NumbersActivity.getCallingIntent(thisRef), thisRef),
-                TargetActivity("Bottom Bar Progress", TestBottomSheetActivity.getCallingIntent(thisRef), thisRef)
+                TargetActivity("Bottom Bar Progress", TestBottomSheetActivity.getCallingIntent(thisRef), thisRef),
+                TargetActivity("Test pager", TestPagerAdapter.getCallingIntent(thisRef), thisRef)
         )
     }
 }

@@ -3,6 +3,7 @@ package com.inqbarna.iqloaders.paged;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 
+import com.inqbarna.common.paging.PaginatedAdapterDelegate;
 import com.inqbarna.common.paging.PaginatedList;
 
 import java.util.AbstractList;
@@ -77,11 +78,17 @@ public class LoaderPaginatedList<U> implements PaginatedList<U> {
     }
 
     @Override
-    public void clear() {
+    public void clear(@Nullable PaginatedAdapterDelegate.ItemRemovedCallback<U> itemRemovedCallback) {
+        if (null != itemRemovedCallback) {
+            for (U item : list) {
+                itemRemovedCallback.onItemRemoved(item);
+            }
+        }
         list.clear();
         completed = true;
         mLoader = null;
     }
+
 
     int getLastPage() {
         return lastPage;
