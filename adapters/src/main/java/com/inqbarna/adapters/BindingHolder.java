@@ -1,5 +1,6 @@
 package com.inqbarna.adapters;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.databinding.ViewDataBinding;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
@@ -44,6 +45,10 @@ public class BindingHolder extends RecyclerView.ViewHolder implements GroupIndic
             }
             mDataBinding.executePendingBindings();
         }
+    }
+
+    public void setLifecycleOwner(LifecycleOwner owner) {
+        mDataBinding.setLifecycleOwner(owner);
     }
 
     private void bindValue(int varId, Object val, boolean execPending) {

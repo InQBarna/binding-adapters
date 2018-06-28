@@ -1,5 +1,6 @@
 package com.inqbarna.adapters;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -62,6 +63,7 @@ public abstract class BindingAdapter extends RecyclerView.Adapter<BindingHolder>
     private RecyclerView mRecyclerView;
     private GridLayoutManager.SpanSizeLookup mSpanSizeLookup;
     private Integer mSpanCount;
+    private LifecycleOwner lifecycleOwner;
 
     protected BindingAdapter() {
         this(null);
@@ -82,10 +84,17 @@ public abstract class BindingAdapter extends RecyclerView.Adapter<BindingHolder>
     @Override
     public BindingHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         final BindingHolder bindingHolder = mAdapterDelegate.onCreateViewHolder(parent, viewType);
+        if (null != lifecycleOwner) {
+            bindingHolder.setLifecycleOwner(lifecycleOwner);
+        }
         if (DEBUG) {
             Timber.d("Creating holder [%s] of type: 0x%s", getHolderId(bindingHolder), Integer.toHexString(viewType));
         }
         return bindingHolder;
+    }
+
+    public void setLifecycleOwner(LifecycleOwner owner) {
+        lifecycleOwner = owner;
     }
 
     private String getHolderId(@NonNull BindingHolder holder) {
