@@ -36,7 +36,7 @@ dependencies {
     api group: 'io.reactivex.rxjava2', name: 'rxjava', version: rxJava2Version
 
     // Android databinding
-    kapt "com.android.databinding:compiler:$plugin_version"
+//    kapt "com.android.databinding:compiler:$plugin_version"
 
     compileOnly "com.jakewharton.timber:timber:${timberVersion}"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
