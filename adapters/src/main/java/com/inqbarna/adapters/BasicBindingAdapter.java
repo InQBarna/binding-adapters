@@ -138,7 +138,6 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
                 while (count > 0) {
                     operations.remove(position);
                     count--;
-                    position++;
                 }
             }
 
@@ -340,24 +339,31 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
         }
 
         public void apply() {
-            if (null != diffResult) {
-                debugMessage("================== START Applying results ==============");
-                if (!mDisposable.isDisposed()) {
-                    dbgPrintList(adapter.mData, "Items in original list", "-");
-                    dbgPrintList(targetList, "Items in desired list", "+");
-                    adapter.onUpdateFinished(diffResult, targetList, this);
-                    dbgPrintList(adapter.mData, "Items in resulting list", "==>");
-                    assert targetList.size() == adapter.mData.size();
-                    mObserver.onSuccess(adapter.mData);
+            try {
+                if (null != diffResult) {
+                    debugMessage("================== START Applying results ==============");
+                    if (!mDisposable.isDisposed()) {
+                        dbgPrintList(adapter.mData, "Items in original list", "-");
+                        dbgPrintList(targetList, "Items in desired list", "+");
+                        adapter.onUpdateFinished(diffResult, targetList, this);
+                        dbgPrintList(adapter.mData, "Items in resulting list", "==>");
+                        assert targetList.size() == adapter.mData.size();
+                        mObserver.onSuccess(adapter.mData);
+                    } else {
+                        debugMessage("Skip, target disposed!!");
+                    }
+                    debugMessage("================== DONE Applying results ==============");
                 } else {
-                    debugMessage("Skip, target disposed!!");
-                }
-                debugMessage("================== DONE Applying results ==============");
-            } else {
-                Timber.e("Some unknown error happened while processing");
-                if (!mDisposable.isDisposed()) {
-                    mObserver.onError(new IllegalStateException("No diff could be computed"));
+                    Timber.e("Some unknown error happened while processing");
+                    if (!mDisposable.isDisposed()) {
+                        mObserver.onError(new IllegalStateException("No diff could be computed"));
 
+                    }
+                }
+            } catch (Throwable throwable) {
+                Timber.e(throwable, "Error applying changes");
+                if (!mDisposable.isDisposed()) {
+                    mObserver.onError(throwable);
                 }
             }
         }

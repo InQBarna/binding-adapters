@@ -1,6 +1,7 @@
 package com.inqbarna.libsamples
 
 import android.support.v7.widget.RecyclerView
+import com.google.common.collect.Collections2
 import com.google.common.truth.IterableSubject
 import com.google.common.truth.Truth.assertThat
 import com.inqbarna.adapters.BasicBindingAdapter
@@ -12,15 +13,12 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.android.util.concurrent.RoboExecutorService
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLog
 import timber.log.Timber
-import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.TimeUnit
 
 /**
  * @author David García <david.garcia@inqbarna.com>
@@ -107,6 +105,26 @@ class BindingAdapterTest {
     }
 
     @Test
+    fun `original task is aborted when not subscribed`() {
+        adapter.setItems(listOf(
+                TestItems(1, "Second")
+        ))
+
+        val newItems = listOf(
+                TestItems(0, "First"),
+                TestItems(1, "Changed second"),
+                TestItems(2, "Third"),
+                TestItems(3, "Fourth")
+        )
+
+        val resultsObserver = TestObserver<List<TestItems>>().also {
+            it.dispose()
+        }
+        adapter.updateItems(newItems).subscribeWith(resultsObserver)
+        resultsObserver.assertEmpty()
+    }
+
+    @Test
     fun testAnotherCombination() {
         adapter.setItems(listOf(
                 TestItems(0, "A"),
@@ -131,6 +149,35 @@ class BindingAdapterTest {
             assertThat(it).containsAllIn(newItems).inOrder()
             return@Predicate true
         })
+    }
+
+    @Test
+    fun `test permutations of two lists, works properly`() {
+        adapter.setItems(INITIAL_DATA_SET)
+
+        val firstDataPermutations = Collections2.permutations(INITIAL_DATA_SET).take(80)
+
+        val second_list = listOf(
+                TestItems(0, "First"),
+                TestItems(1, "Changed second"),
+                TestItems(2, "Third"),
+                TestItems(3, "Fourth")
+        )
+
+        val secondDataPermutations = Collections2.permutations(second_list).toList()
+
+        val final_list = firstDataPermutations + secondDataPermutations
+        Timber.d("Number of permutations to test: %d", final_list.size)
+        final_list.forEachIndexed { index, items ->
+            val resultsObserver = TestObserver<List<TestItems>>()
+            adapter.updateItems(items).subscribe(resultsObserver)
+            Timber.d("Processing iteration: %d", index)
+            resultsObserver.assertComplete()
+            resultsObserver.assertValue(Predicate {
+                assertThat(it).containsAllIn(it).inOrder()
+                return@Predicate true
+            })
+        }
     }
 
     @Test
