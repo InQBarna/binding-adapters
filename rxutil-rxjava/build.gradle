@@ -28,12 +28,12 @@ android {
 dependencies {
     api project(':common')
     api project(':rxutil')
-    implementation "com.android.support:recyclerview-v7:${supportLibsVersion}"
-    implementation group: 'io.reactivex', name: 'rxjava', version: rxJavaVersion
-    implementation group: 'io.reactivex', name: 'rxjava-reactive-streams', version: '1.2.1'
-    implementation 'io.reactivex:rxandroid:1.2.1'
-    androidTestImplementation("com.android.support.test.espresso:espresso-core:$espressoVersion", {
+    implementation libraries.support.v4
+    implementation libraries.rxJava.base
+    implementation libraries.rxJava.reactiveStreams
+    implementation libraries.rxJava.android
+    androidTestImplementation(testLibraries.espresso, {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testImplementation "junit:junit:$jUnitVersion"
+    testImplementation testLibraries.junit
 }

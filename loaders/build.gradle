@@ -23,6 +23,6 @@ android {
 
 dependencies {
     implementation project(':common')
-    implementation "com.android.support:support-v4:${rootProject.ext.supportLibsVersion}"
-    implementation "com.android.support:recyclerview-v7:${rootProject.ext.supportLibsVersion}"
+    implementation libraries.support.v4
+    implementation libraries.support.recyclerView
 }

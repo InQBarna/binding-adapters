@@ -30,13 +30,12 @@ android {
 dependencies {
     api project(':common')
     api project(':rxutil')
-    compileOnly "com.jakewharton.timber:timber:${timberVersion}"
-    implementation "com.android.support:recyclerview-v7:${supportLibsVersion}"
-    implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: rxJava2Version
-    implementation group: 'io.reactivex.rxjava2', name: 'rxandroid', version: rxJava2Android
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    androidTestImplementation("com.android.support.test.espresso:espresso-core:$espressoVersion", {
+    compileOnly libraries.jake.timber
+    implementation libraries.rxJava2.base
+    implementation libraries.rxJava2.android
+    implementation libraries.kotlin.jdk8
+    androidTestImplementation(testLibraries.espresso, {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testImplementation "junit:junit:$jUnitVersion"
+    testImplementation testLibraries.junit
 }

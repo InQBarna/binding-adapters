@@ -29,11 +29,11 @@ android {
 
 dependencies {
     api project(':common')
-    implementation "com.android.support:recyclerview-v7:${supportLibsVersion}"
-    implementation group: 'org.reactivestreams', name: 'reactive-streams', version: "1.0.2"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    androidTestImplementation("com.android.support.test.espresso:espresso-core:$espressoVersion", {
+    api libraries.support.recyclerView
+    implementation libraries.reactiveStreams
+    implementation libraries.kotlin.jdk8
+    androidTestImplementation(testLibraries.espresso, {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testImplementation "junit:junit:$jUnitVersion"
+    testImplementation testLibraries.junit
 }

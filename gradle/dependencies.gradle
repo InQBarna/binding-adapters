@@ -1,0 +1,81 @@
+
+ext {
+
+    versions = [
+            supportLibsVersion: "28.0.0",
+            constraintLayout   : "1.1.0",
+            timberVersion: "4.6.1",
+            rxJavaVersion: "1.2.7",
+            daggerVersion: "2.14.1",
+            rxJava2Version: "2.1.6",
+            rxJava2AndroidVersion: "2.0.2",
+            guavaVersion: "25.1-android",
+            reactiveStreamsVersion: "1.0.2",
+
+            jUnitVersion: "4.12",
+            powerMockVersion: "2.0.0-beta5",
+            mockito: "2.12.0",
+            truthVersion: "0.39",
+            robolectricVersion: "3.5.1",
+            shadowsVersion: "3.7.1",
+            espressoVersion: "3.0.1"
+    ]
+
+    libraries = [
+            support: [
+                    appCompat:  "com.android.support:appcompat-v7:${versions.supportLibsVersion}",
+                    recyclerView: "com.android.support:recyclerview-v7:${versions.supportLibsVersion}",
+                    design: "com.android.support:design:${versions.supportLibsVersion}",
+                    v4: "com.android.support:support-v4:${versions.supportLibsVersion}",
+            ],
+            android: [
+                    constraintLayout: "com.android.support.constraint:constraint-layout:${versions.constraintLayout}"
+            ],
+            guava: [
+                    base: "com.google.guava:guava:${versions.guavaVersion}",
+            ],
+            jake: [
+                    timber: "com.jakewharton.timber:timber:${versions.timberVersion}",
+                    butterKnife: 'com.jakewharton:butterknife:8.8.1',
+                    butterKnifeCompiler: 'com.jakewharton:butterknife-compiler:8.8.1',
+            ],
+            rxJava: [
+                    base: "io.reactivex:rxjava:${versions.rxJavaVersion}",
+                    android: 'io.reactivex:rxandroid:1.2.1',
+                    reactiveStreams: "io.reactivex:rxjava-reactive-streams:1.2.1"
+            ],
+            reactiveStreams: "org.reactivestreams:reactive-streams:${versions.reactiveStreamsVersion}",
+            rxJava2: [
+                    base: "io.reactivex.rxjava2:rxjava:${versions.rxJava2Version}",
+                    interop: "com.github.akarnokd:rxjava2-interop:0.13.2",
+                    android: "io.reactivex.rxjava2:rxandroid:${versions.rxJava2AndroidVersion}"
+            ],
+            kotlin: [
+                    jdk8: "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+            ],
+            dagger: [
+                    base: "com.google.dagger:dagger:${versions.daggerVersion}",
+                    compiler: "com.google.dagger:dagger-compiler:${versions.daggerVersion}",
+            ]
+    ]
+
+    testLibraries = [
+            powermock: [
+                    api: "org.powermock:powermock-api-mockito2:${versions.powerMockVersion}",
+                    junit4: "org.powermock:powermock-module-junit4:${versions.powerMockVersion}",
+                    junit4Rule: "org.powermock:powermock-module-junit4-rule:${versions.powerMockVersion}",
+                    classloadingXstream: "org.powermock:powermock-classloading-xstream:${versions.powerMockVersion}",
+            ],
+            mockito: [
+                    base: "org.mockito:mockito-core:${versions.mockito}"
+            ],
+            truth: "com.google.truth:truth:${versions.truthVersion}",
+            robolectric: [
+                    base: "org.robolectric:robolectric:${versions.robolectricVersion}",
+                    shadowsSupport: "org.robolectric:robolectric:${versions.shadowsVersion}",
+                    shadowsMultidex: "org.robolectric:robolectric:${versions.shadowsVersion}",
+            ],
+            junit: "junit:junit:${versions.jUnitVersion}",
+            espresso: "com.android.support.test.espresso:espresso-core:${versions.espressoVersion}"
+    ]
+}

@@ -39,9 +39,9 @@ class BottomOffsetBehavior : CoordinatorLayout.Behavior<View> {
         }
         ta.recycle()
     }
-
-    override fun layoutDependsOn(parent: CoordinatorLayout?, child: View?, dependency: View?): Boolean {
-        return targetId != 0 && targetId == dependency?.id
+    
+    override fun layoutDependsOn(parent: CoordinatorLayout, child: View, dependency: View): Boolean {
+        return targetId != 0 && targetId == dependency.id
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, child: View, dependency: View): Boolean {
