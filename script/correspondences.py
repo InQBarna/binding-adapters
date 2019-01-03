@@ -22,9 +22,9 @@ class Correspondences:
                         toKey = mapping.fieldnames[1]
                         pdbg("FromKey = %s" % fromKey)
                         pdbg("ToKey = %s" % toKey)
-                    pdbg("rowFrom = %s" % row[fromKey])
+                    praw("rowFrom = %s" % row[fromKey])
                     self._mapping[row[fromKey]] = row[toKey]
 
         for f,t in self._mapping.items():
-            pdbg("From '%s' -> '%s'" % (f, t))
+            praw("From '%s' -> '%s'" % (f, t))
 

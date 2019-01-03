@@ -3,7 +3,9 @@
 import argparse
 import os.path
 import logger
+import walker
 from logger import *
+import re
 
 
 
@@ -15,25 +17,35 @@ def dir_check(dname):
         raise argparse.ArgumentTypeError("%s is not a valid directory" % dname)
     return dname
 
+def regex_type(argval):
+    return re.compile(argval)
+
 
 def main(args):
     import correspondences
 
     logger.VERBOSITY=args.verbose
+    praw(repr(args))
 
     pinfo("Will open url '%s'" % args.url)
 
     correspondences = correspondences.Correspondences(args.url)
+
+    srcTree = walker.SourceTree(args.src, args.exclude_dir)
+    for s in srcTree:
+        pdbg(str(s))
+
 	
 
 if __name__ == "__main__":
-	import sys
-	parser = argparse.ArgumentParser()
-	parser.add_argument("-v", "--verbose", help="Increment verbosity level", action="count")
-	parser.add_argument("src", help="Sources directory", type=dir_check)
-	parser.add_argument("-u", "--url", help="CSV url", default="https://developer.android.com/topic/libraries/support-library/downloads/androidx-class-mapping.csv")
-	args = parser.parse_args()
+    import sys
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--verbose", help="Increment verbosity level", action="count")
+    parser.add_argument("src", help="Sources directory", type=dir_check)
+    parser.add_argument("-u", "--url", help="CSV url", default="https://developer.android.com/topic/libraries/support-library/downloads/androidx-class-mapping.csv")
+    parser.add_argument("-e", "--exclude-dir", help="exclude source dirs mathing this value. This option can be given many times", action="append", type=regex_type)
+    args = parser.parse_args()
 
-	del sys.argv[1:]
+    del sys.argv[1:]
 
-	main(args)
+    main(args)
