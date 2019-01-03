@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+import argparse
+import os.path
+import logger
+from logger import *
+
+
+
+
+def dir_check(dname):
+    if not os.path.exists(dname):
+        raise argparse.ArgumentTypeError("%s is not a valid directory" % dname)
+    elif not os.path.isdir(dname):
+        raise argparse.ArgumentTypeError("%s is not a valid directory" % dname)
+    return dname
+
+
+def main(args):
+    import correspondences
+
+    logger.VERBOSITY=args.verbose
+
+    pinfo("Will open url '%s'" % args.url)
+
+    correspondences = correspondences.Correspondences(args.url)
+	
+
+if __name__ == "__main__":
+	import sys
+	parser = argparse.ArgumentParser()
+	parser.add_argument("-v", "--verbose", help="Increment verbosity level", action="count")
+	parser.add_argument("src", help="Sources directory", type=dir_check)
+	parser.add_argument("-u", "--url", help="CSV url", default="https://developer.android.com/topic/libraries/support-library/downloads/androidx-class-mapping.csv")
+	args = parser.parse_args()
+
+	del sys.argv[1:]
+
+	main(args)
