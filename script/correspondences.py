@@ -1,6 +1,7 @@
 import urllib.request
 import csv
 import io
+import re
 from logger import *
 
 
@@ -8,7 +9,7 @@ class Correspondences:
     def __init__(self, url):
         self.url = url
         self._mapping = {}
-        self._package_mapping = {}
+        self._package_mapping = []
         self._do_create_correspondences()
 
     def _do_create_correspondences(self):
@@ -30,14 +31,23 @@ class Correspondences:
             pdbg("From '%s' -> '%s'" % (f, t))
             srcPkg = Correspondences._get_package(f)
             if srcPkg not in self._package_mapping:
-                self._package_mapping[srcPkg] = Correspondences._get_package(t)
+                self._package_mapping.append(_PackageReplacement(srcPkg, Correspondences._get_package(t)))
 
-        for f,t in self._package_mapping.items():
-            pdbg("Package '%s' => '%s'" % (f, t))
+        for repl in self._package_mapping:
+            pdbg(str(repl))
 
     def fix_line(self, srcline):
         return "TODO: %s" % srcline
 
     def _get_package(val):
-        return ".".join(val.split('.')[:-1])
+        return ".".join(val.split('.')[:-1]) + "."
 
+
+class _PackageReplacement:
+    def __init__(self, srcPackage, dstPackage):
+        escaped = re.escape(srcPackage)
+        self._matcher = re.compile(f"{escaped}(\w+)", re.ASCII)
+        self._dstPackage = dstPackage
+
+    def __str__(self):
+        return f"Matcher={self._matcher} ==> Replaces to: {self._dstPackage}"

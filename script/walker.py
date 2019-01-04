@@ -35,16 +35,31 @@ class SourceFile:
     def __str__(self):
         return "Source file at '%s'" % self._path
 
-    def processor(self):
+    def _open_write_path(self, dryRun):
+        if dryRun:
+            return _CustomDBGIO()
+        else:
+            return io.TextIOWrapper(io.BufferedWriter(io.FileIO(self._path, mode="w")))
+
+    def processor(self, dryRun = False):
         with io.BytesIO() as _byteBuffer:
             with io.FileIO(self._path, mode="r") as _file:
                 readBytes = _byteBuffer.write(_file.read())
             
             _byteBuffer.seek(0, io.SEEK_SET)
             with io.BufferedReader(_byteBuffer) as _buffer:
-                with io.TextIOWrapper(io.BufferedWriter(io.FileIO(self._path, mode="w"))) as _out:
+                with self._open_write_path(dryRun) as _out:
                     with io.TextIOWrapper(_buffer, encoding="utf-8", errors='strict') as _src:
                         for line in _src:
                             replacement = yield line
                             if replacement:
                                 _out.write(replacement)
+
+
+class _CustomDBGIO(io.TextIOBase):
+    def __init__(self):
+        pass
+
+    def write(self, txt):
+        pdbg(txt.strip())
+        return len(txt)

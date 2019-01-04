@@ -34,7 +34,7 @@ def main(args):
     srcTree = walker.SourceTree(args.src, args.exclude_dir)
     for s in srcTree:
         pdbg("Procesing: %s" % s)
-        processor = s.processor()
+        processor = s.processor(args.dry_run)
         try:
             replacement = None
             while True:
@@ -54,6 +54,7 @@ if __name__ == "__main__":
     parser.add_argument("src", help="Sources directory", type=dir_check)
     parser.add_argument("-u", "--url", help="CSV url", default="https://developer.android.com/topic/libraries/support-library/downloads/androidx-class-mapping.csv")
     parser.add_argument("-e", "--exclude-dir", help="exclude source dirs mathing this value. This option can be given many times", action="append", type=regex_type)
+    parser.add_argument("-n", "--dry-run", help="dry run", action="store_true", required=False)
     args = parser.parse_args()
 
     del sys.argv[1:]
