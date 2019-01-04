@@ -2,6 +2,7 @@ import os
 import os.path
 import re
 from logger import *
+import io
 
 class SourceTree:
     __path_name_regex = re.compile(r".*\.(?:java|kt)")
@@ -33,3 +34,17 @@ class SourceFile:
 
     def __str__(self):
         return "Source file at '%s'" % self._path
+
+    def processor(self):
+        with io.BytesIO() as _byteBuffer:
+            with io.FileIO(self._path, mode="r") as _file:
+                readBytes = _byteBuffer.write(_file.read())
+            
+            _byteBuffer.seek(0, io.SEEK_SET)
+            with io.BufferedReader(_byteBuffer) as _buffer:
+                with io.TextIOWrapper(io.BufferedWriter(io.FileIO(self._path, mode="w"))) as _out:
+                    with io.TextIOWrapper(_buffer, encoding="utf-8", errors='strict') as _src:
+                        for line in _src:
+                            replacement = yield line
+                            if replacement:
+                                _out.write(replacement)

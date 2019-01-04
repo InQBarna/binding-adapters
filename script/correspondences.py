@@ -8,6 +8,7 @@ class Correspondences:
     def __init__(self, url):
         self.url = url
         self._mapping = {}
+        self._package_mapping = {}
         self._do_create_correspondences()
 
     def _do_create_correspondences(self):
@@ -26,5 +27,17 @@ class Correspondences:
                     self._mapping[row[fromKey]] = row[toKey]
 
         for f,t in self._mapping.items():
-            praw("From '%s' -> '%s'" % (f, t))
+            pdbg("From '%s' -> '%s'" % (f, t))
+            srcPkg = Correspondences._get_package(f)
+            if srcPkg not in self._package_mapping:
+                self._package_mapping[srcPkg] = Correspondences._get_package(t)
+
+        for f,t in self._package_mapping.items():
+            pdbg("Package '%s' => '%s'" % (f, t))
+
+    def fix_line(self, srcline):
+        return "TODO: %s" % srcline
+
+    def _get_package(val):
+        return ".".join(val.split('.')[:-1])
 

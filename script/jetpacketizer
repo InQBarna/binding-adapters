@@ -33,9 +33,19 @@ def main(args):
 
     srcTree = walker.SourceTree(args.src, args.exclude_dir)
     for s in srcTree:
-        pdbg(str(s))
-
-	
+        pdbg("Procesing: %s" % s)
+        processor = s.processor()
+        try:
+            replacement = None
+            while True:
+                original = processor.send(replacement)
+                if original:
+                    replacement = correspondences.fix_line(original)
+                else:
+                    replacement = None
+        except StopIteration:
+            pdbg("ended processing of '%s'" % s)
+            pass
 
 if __name__ == "__main__":
     import sys
