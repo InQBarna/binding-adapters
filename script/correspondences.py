@@ -37,7 +37,11 @@ class Correspondences:
             pdbg(str(repl))
 
     def fix_line(self, srcline):
-        return "TODO: %s" % srcline
+        result = srcline
+        for repl in self._package_mapping:
+            result = repl.do_replace(result)
+
+        return result
 
     def _get_package(val):
         return ".".join(val.split('.')[:-1]) + "."
@@ -51,3 +55,11 @@ class _PackageReplacement:
 
     def __str__(self):
         return f"Matcher={self._matcher} ==> Replaces to: {self._dstPackage}"
+
+    def _target_replace(self, matchobj):
+        replacement = self._dstPackage + matchobj.group(1)
+        praw("Changed '%s' with '%s'" % (matchobj.group(0), replacement))
+        return replacement
+
+    def do_replace(self, srcLine):
+        return self._matcher.sub(self._target_replace, srcLine)
