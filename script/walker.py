@@ -5,13 +5,11 @@ from logger import *
 import io
 
 class SourceTree:
-    __path_name_regex = re.compile(r".*\.(?:java|kt)")
+    __srcfile_path_name_regex = re.compile(r".*\.(?:java|kt)")
+    __buildfile_path_name_regex = re.compile(r".*\.gradle")
     def __init__(self, root, excludes):
         self._root = root
         self._excludes = excludes
-
-    def __iter__(self):
-        return self.scan()
 
     def _should_discard(self, tgt):
         for ex_expression in self._excludes:
@@ -20,20 +18,30 @@ class SourceTree:
                 return True
         return False
 
-    def scan(self):
+    def sourcefiles(self):
+        return self._iterate_over_sources(SourceTree.__srcfile_path_name_regex, lambda path: SourceFile(path, SourceFile.TYPE_SRC))
+
+    def _iterate_over_sources(self, regex, creator):
         for root, dirs, files in os.walk(self._root):
-            source_candidates = [f for f in files if SourceTree.__path_name_regex.match(f) != None]
+            source_candidates = [f for f in files if regex.match(f) != None]
             dirs[:] = [d for d in dirs if not self._should_discard(os.path.join(root, d))]
 
             for s in source_candidates:
-                yield SourceFile(os.path.join(root, s))
+                yield creator(os.path.join(root, s))
+
+    def buildfiles(self):
+        return self._iterate_over_sources(SourceTree.__buildfile_path_name_regex, lambda path: SourceFile(path, SourceFile.TYPE_BUILDFILE))
 
 class SourceFile:
-    def __init__(self, path):
+    TYPE_SRC="source"
+    TYPE_BUILDFILE="buildfile"
+
+    def __init__(self, path, fileType):
         self._path = path
+        self._fileType = fileType
 
     def __str__(self):
-        return "Source file at '%s'" % self._path
+        return "Source file at '%s' type = %s" % (self._path, self._fileType)
 
     def _open_write_path(self, dryRun):
         if dryRun:
