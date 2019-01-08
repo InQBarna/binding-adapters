@@ -5,8 +5,8 @@ from logger import *
 import io
 
 class SourceTree:
-    __srcfile_path_name_regex = re.compile(r".*\.(?:java|kt)")
-    __buildfile_path_name_regex = re.compile(r".*\.gradle")
+    __srcfile_path_name_regex = re.compile(r".*\.(?:java|kt)\b$")
+    __buildfile_path_name_regex = re.compile(r".*\.gradle\b$")
     def __init__(self, root, excludes):
         self._root = root
         self._excludes = excludes
@@ -48,6 +48,11 @@ class SourceFile:
             return _CustomDBGIO()
         else:
             return io.TextIOWrapper(io.BufferedWriter(io.FileIO(self._path, mode="w")))
+
+    def lines(self):
+        praw("Getting lines of: %s" % self._path)
+        with open(self._path, "r") as f:
+            yield from f.readlines()
 
     def processor(self, dryRun = False):
         with io.BytesIO() as _byteBuffer:

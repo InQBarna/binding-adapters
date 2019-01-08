@@ -48,6 +48,7 @@ def main(args):
                 pdbg("ended processing of '%s'" % s)
                 pass
     if not args.no_buildfiles:
+        correspondences.extend_with_buildfiles(srcTree.buildfiles())
         for s in srcTree.buildfiles():
             pdbg("Processing: %s" % s)
 
