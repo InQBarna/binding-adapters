@@ -44,7 +44,7 @@ def main(args):
         if args.affected_files:
             print("Would check %s" % s)
         else:
-            pdbg("Procesing: %s" % s)
+            pinfo("Procesing: %s" % s)
             processor = s.processor(args.dry_run)
             try:
                 replacement = None
@@ -55,7 +55,7 @@ def main(args):
                     else:
                         replacement = None
             except StopIteration:
-                pdbg("ended processing of '%s'" % s)
+                pinfo("ended processing of '%s'" % s)
                 pass
 
 if __name__ == "__main__":

@@ -95,7 +95,7 @@ class SourceFile:
                             if replacement:
                                 _out.write(replacement)
                         if self.fileType == SourceFile.TYPE_CONFIG:
-                            _out.write("android.useAndroidX=true\n")
+                            _out.write("\nandroid.useAndroidX=true\n")
                             _out.write("android.enableJetifier=true\n")
 
 
@@ -104,5 +104,5 @@ class _CustomDBGIO(io.TextIOBase):
         pass
 
     def write(self, txt):
-        pdbg(txt.strip())
+        print(txt.strip())
         return len(txt)

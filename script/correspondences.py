@@ -99,10 +99,10 @@ class Correspondences:
 
 class _ArtifactReplacement:
     def __init__(self, artifactSrc, artifactDst):
-        self._src_artifact = artifactSrc
+        self._src_artifact = artifactSrc.strip()
         idx = artifactDst.rfind(":")
-        self._dst_artifact = artifactDst[:idx]
-        self._dst_version = artifactDst[(idx + 1):]
+        self._dst_artifact = artifactDst[:idx].strip()
+        self._dst_version = artifactDst[(idx + 1):].strip()
         self._src_match_form1 = re.compile(r"(?P<form1>" + re.escape(artifactSrc) + r"):\$\{?(?:\w+\.)*(?P<version>[^\}\"'\s]+)\}?")
         parts = artifactDst.split(":")
         self._targetVersionVar = _ArtifactReplacement._extract_ver_name(parts[1])
@@ -136,23 +136,34 @@ class _ArtifactReplacement:
     def _v1_replace(self, matchobj):
         form1_start, form1_end = matchobj.span("form1")
         ver_start, ver_end = matchobj.span("version")
-        src = matchobj.string
+        absStart = matchobj.start(0)
+        form1_start -= absStart
+        form1_end -= absStart
+        ver_start -= absStart
+        ver_end -= absStart
+        src = matchobj[0]
         res = src[:form1_start] + self._dst_artifact + src[form1_end:ver_start] + self._targetVersionVar + src[ver_end:]
-        res = self._append_latest_version(res)
-        praw("Replace '%s' with '%s'" % (src, res))
+        praw("Replace(V1) '%s' with '%s'" % (src.strip(), res.strip()))
         return res
 
     def _v2_replace(self, matchobj):
         gname_start, gname_end = matchobj.span("gname")
         modname_start, modname_end = matchobj.span("modname")
         ver_start, ver_end = matchobj.span("version")
-        whole = matchobj.string
+
+        absStart = matchobj.start(0)
+        gname_start -= absStart
+        gname_end -= absStart
+        modname_start -= absStart
+        modname_end -= absStart
+        ver_start -= absStart
+        ver_end -= absStart
+        whole = matchobj[0]
 
         parts = self._dst_artifact.split(":")
 
         res = whole[:gname_start] + parts[0] + whole[gname_end:modname_start] + parts[1] + whole[modname_end:ver_start] + self._targetVersionVar + whole[ver_end:]
-        res = self._append_latest_version(res)
-        praw("Replace(V2) '%s' with '%s'" % (whole, res))
+        praw("Replace(V2) '%s' with '%s'" % (whole.strip(), res.strip()))
         return res
 
     def _append_latest_version(self, tgt):
@@ -165,11 +176,11 @@ class _ArtifactReplacement:
     def do_replace(self, srcLine):
         out, nSubs = self._src_match_form1.subn(self._v1_replace, srcLine)
         if nSubs > 0:
-            return out
+            return self._append_latest_version(out)
 
         out, nSubs = self._src_match_form2.subn(self._v2_replace, srcLine)
         if nSubs > 0:
-            return out
+            return self._append_latest_version(out)
         return None
 
 class _VersionReplacement:
