@@ -87,6 +87,9 @@ class Correspondences:
                     res = out
                     break
             return out if out else srcline
+        elif srcType == SourceFile.TYPE_CONFIG:
+            pdbg("We're not changing any line of config files")
+            return srcline
         else:
             raise ValueError("Invalid file type %s" % srcType)
 

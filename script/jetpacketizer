@@ -24,7 +24,7 @@ def regex_type(argval):
 def main(args):
     import correspondences
 
-    logger.VERBOSITY=args.verbose
+    logger.VERBOSITY = args.verbose if args.verbose else 0
     praw(repr(args))
 
     pinfo("Will open url '%s'" % args.url)
@@ -38,21 +38,26 @@ def main(args):
 
     if not args.no_buildfiles:
         types.append(walker.SourceFile.TYPE_BUILDFILE)
+        types.append(walker.SourceFile.TYPE_CONFIG)
 
     for s in srcTree.files(*types):
-        pdbg("Procesing: %s" % s)
-        processor = s.processor(args.dry_run)
-        try:
-            replacement = None
-            while True:
-                original = processor.send(replacement)
-                if original:
-                    replacement = correspondences.fix_source_line(original, s.fileType)
-                else:
-                    replacement = None
-        except StopIteration:
-            pdbg("ended processing of '%s'" % s)
-            pass
+        if args.affected_files:
+            print("Would check %s" % s)
+        else:
+            pdbg("Procesing: %s" % s)
+            processor = s.processor(args.dry_run)
+            try:
+                replacement = None
+                while True:
+                    original = processor.send(replacement)
+                    if original:
+                        replacement = correspondences.fix_source_line(original, s.fileType)
+                    else:
+                        replacement = None
+            except StopIteration:
+                pdbg("ended processing of '%s'" % s)
+                pass
+
 if __name__ == "__main__":
     import sys
     parser = argparse.ArgumentParser()
@@ -64,6 +69,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--dry-run", help="dry run", action="store_true", required=False)
     parser.add_argument("--no-source", help="Disable source files parsing", action="store_true", required=False)
     parser.add_argument("--no-buildfiles", help="Disable build files parsing", action="store_true", required=False)
+    parser.add_argument("--affected-files", help="Just print files that would be changed and exits", action="store_true", required=False)
     args = parser.parse_args()
 
     del sys.argv[1:]

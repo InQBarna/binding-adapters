@@ -8,6 +8,7 @@ import itertools
 class SourceTree:
     __srcfile_path_name_regex = re.compile(r".*\.(?:java|kt)\b$")
     __buildfile_path_name_regex = re.compile(r".*\.gradle\b$")
+    __configfile_path_name_regex = re.compile(r"gradle\.properties")
     def __init__(self, root, excludes):
         self._root = root
         self._excludes = excludes
@@ -21,41 +22,53 @@ class SourceTree:
 
     def files(self, *types):
         res = None
+        regexes = []
         if SourceFile.TYPE_SRC in types:
             pdbg("Adding files iterator")
-            res = itertools.chain(res, self.sourcefiles()) if res else self.sourcefiles()
+            regexes.append((SourceTree.__srcfile_path_name_regex, SourceFile.TYPE_SRC))
 
         if SourceFile.TYPE_BUILDFILE in types:
             pdbg("Adding buildfiles iterator")
-            res = itertools.chain(res, self.buildfiles()) if res else self.buildfiles()
+            regexes.append((SourceTree.__buildfile_path_name_regex, SourceFile.TYPE_BUILDFILE))
 
-        pdbg("Will return: " + repr(res))
-        return res if res else []
+        if SourceFile.TYPE_CONFIG in types:
+            pdbg("Adding configs iterator")
+            regexes.append((SourceTree.__configfile_path_name_regex, SourceFile.TYPE_CONFIG))
+
+        praw("Will return: " + repr(res))
+        return self._iterate_over_sources(regexes) if len(regexes) > 0 else []
 
     def sourcefiles(self):
-        return self._iterate_over_sources(SourceTree.__srcfile_path_name_regex, lambda path: SourceFile(path, SourceFile.TYPE_SRC))
+        return self._iterate_over_sources((SourceTree.__srcfile_path_name_regex, SourceFile.TYPE_SRC))
 
-    def _iterate_over_sources(self, regex, creator):
+    def _iterate_over_sources(self, regex_type_combo):
+        if not isinstance(regex_type_combo, list):
+            rtc = [regex_type_combo]
+        else:
+            rtc = regex_type_combo
+
+        regexes = [r[0] for r in regex_type_combo]
         for root, dirs, files in os.walk(self._root):
-            source_candidates = [f for f in files if regex.match(f) != None]
+            source_candidates = [(f,t[1]) for t in rtc for f in files if t[0].match(f)]
             dirs[:] = [d for d in dirs if not self._should_discard(os.path.join(root, d))]
 
             for s in source_candidates:
-                yield creator(os.path.join(root, s))
+                yield SourceFile(os.path.join(root, s[0]), s[1])
 
     def buildfiles(self):
-        return self._iterate_over_sources(SourceTree.__buildfile_path_name_regex, lambda path: SourceFile(path, SourceFile.TYPE_BUILDFILE))
+        return self._iterate_over_sources((SourceTree.__buildfile_path_name_regex, SourceFile.TYPE_BUILDFILE))
 
 class SourceFile:
     TYPE_SRC="source"
     TYPE_BUILDFILE="buildfile"
+    TYPE_CONFIG="config"
 
     def __init__(self, path, fileType):
         self._path = path
         self.fileType = fileType
 
     def __str__(self):
-        return "Source file at '%s' type = %s" % (self._path, self.fileType)
+        return "{FilePath:'%s' type = %s}" % (self._path, self.fileType)
 
     def _open_write_path(self, dryRun):
         if dryRun:
@@ -81,6 +94,9 @@ class SourceFile:
                             replacement = yield line
                             if replacement:
                                 _out.write(replacement)
+                        if self.fileType == SourceFile.TYPE_CONFIG:
+                            _out.write("android.useAndroidX=true\n")
+                            _out.write("android.enableJetifier=true\n")
 
 
 class _CustomDBGIO(io.TextIOBase):
