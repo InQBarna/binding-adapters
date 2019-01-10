@@ -2,6 +2,7 @@ import urllib.request
 import csv
 import io
 import re
+from walker import SourceFile
 from logger import *
 
 
@@ -71,12 +72,23 @@ class Correspondences:
                return vrepl
         return None
 
-    def fix_source_line(self, srcline):
+    def fix_source_line(self, srcline, srcType):
         result = srcline
-        for repl in self._package_mapping:
-            result = repl.do_replace(result)
+        if srcType == SourceFile.TYPE_SRC:
+            for repl in self._package_mapping:
+                result = repl.do_replace(result)
 
-        return result
+            return result
+        elif srcType == SourceFile.TYPE_BUILDFILE:
+            res = None
+            for repl in self._artifact_replacements:
+                out = repl.do_replace(srcline)
+                if out:
+                    res = out
+                    break
+            return out if out else srcline
+        else:
+            raise ValueError("Invalid file type %s" % srcType)
 
     def _get_package(val):
         return ".".join(val.split('.')[:-1]) + "."
@@ -88,12 +100,18 @@ class _ArtifactReplacement:
         idx = artifactDst.rfind(":")
         self._dst_artifact = artifactDst[:idx]
         self._dst_version = artifactDst[(idx + 1):]
-        self._src_match_form1 = re.compile(re.escape(artifactSrc) + r":\$\{?(?P<version>[^\}\"'\s]+)\}?")
-        parts = [re.escape(part) for part in artifactSrc.split(":")]
-        self._src_match_form2 = re.compile(r"group\s*:\s*(?P<qg>[\"'])" + parts[0] + r"(?P=qg)\s*,\s*name\s*:\s*(?P<qn>[\"'])" + parts[1] + r"(?P=qn)\s*,\s*version\s*:\s*(?P<quote>[\"'])?\$?(?P<ob>\{)?(?P<version>[^\"'}\s]+)(?(ob)\})(?(quote)(?P=quote))")
+        self._src_match_form1 = re.compile(r"(?P<form1>" + re.escape(artifactSrc) + r"):\$\{?(?:\w+\.)*(?P<version>[^\}\"'\s]+)\}?")
+        parts = artifactDst.split(":")
+        self._targetVersionVar = _ArtifactReplacement._extract_ver_name(parts[1])
+        eparts = [re.escape(part) for part in artifactSrc.split(":")]
+        self._src_match_form2 = re.compile(r"group\s*:\s*(?P<qg>[\"'])(?P<gname>" + eparts[0] + r")(?P=qg)\s*,\s*name\s*:\s*(?P<qn>[\"'])(?P<modname>" + eparts[1] + r")(?P=qn)\s*,\s*version\s*:\s*(?P<quote>[\"'])?\$?(?P<ob>\{)?(?:\w+\.)*(?P<version>[^\"'}\s]+)(?(ob)\})(?(quote)(?P=quote))")
+
+    def _extract_ver_name(value):
+        words = [w.lower() if idx == 0 else w.capitalize() for idx, w in enumerate(re.split(r"\W+", value))] + ["Version"]
+        return "".join(words)
 
     def __str__(self):
-        return "From '%s' to '%s' version: %s" % (self._src_artifact, self._dst_artifact, self._dst_version)
+        return "From '%s' to '%s' version: %s=%s" % (self._src_artifact, self._dst_artifact, self._targetVersionVar, self._dst_version)
 
     def matches(self, srcFile, line, lineno):
         matcho = self._src_match_form1.search(line)
@@ -111,7 +129,45 @@ class _ArtifactReplacement:
             return result
 
         return None
-        
+
+    def _v1_replace(self, matchobj):
+        form1_start, form1_end = matchobj.span("form1")
+        ver_start, ver_end = matchobj.span("version")
+        src = matchobj.string
+        res = src[:form1_start] + self._dst_artifact + src[form1_end:ver_start] + self._targetVersionVar + src[ver_end:]
+        res = self._append_latest_version(res)
+        praw("Replace '%s' with '%s'" % (src, res))
+        return res
+
+    def _v2_replace(self, matchobj):
+        gname_start, gname_end = matchobj.span("gname")
+        modname_start, modname_end = matchobj.span("modname")
+        ver_start, ver_end = matchobj.span("version")
+        whole = matchobj.string
+
+        parts = self._dst_artifact.split(":")
+
+        res = whole[:gname_start] + parts[0] + whole[gname_end:modname_start] + parts[1] + whole[modname_end:ver_start] + self._targetVersionVar + whole[ver_end:]
+        res = self._append_latest_version(res)
+        praw("Replace(V2) '%s' with '%s'" % (whole, res))
+        return res
+
+    def _append_latest_version(self, tgt):
+        verStr = " // Latest version: %s" % self._dst_version
+        if not tgt.endswith('\n'):
+            return tgt + verStr
+        else:
+            return tgt[:-1] + verStr + "\n"
+
+    def do_replace(self, srcLine):
+        out, nSubs = self._src_match_form1.subn(self._v1_replace, srcLine)
+        if nSubs > 0:
+            return out
+
+        out, nSubs = self._src_match_form2.subn(self._v2_replace, srcLine)
+        if nSubs > 0:
+            return out
+        return None
 
 class _VersionReplacement:
     def __init__(self, srcFile, lineNo, varName, substitution):

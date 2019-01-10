@@ -32,26 +32,27 @@ def main(args):
     correspondences = correspondences.Correspondences(args.url, args.artifact_url)
 
     srcTree = walker.SourceTree(args.src, args.exclude_dir)
+    types = []
     if not args.no_source:
-        for s in srcTree.sourcefiles():
-            pdbg("Procesing: %s" % s)
-            processor = s.processor(args.dry_run)
-            try:
-                replacement = None
-                while True:
-                    original = processor.send(replacement)
-                    if original:
-                        replacement = correspondences.fix_source_line(original)
-                    else:
-                        replacement = None
-            except StopIteration:
-                pdbg("ended processing of '%s'" % s)
-                pass
-    if not args.no_buildfiles:
-        correspondences.extend_with_buildfiles(srcTree.buildfiles())
-        for s in srcTree.buildfiles():
-            pdbg("Processing: %s" % s)
+        types.append(walker.SourceFile.TYPE_SRC)
 
+    if not args.no_buildfiles:
+        types.append(walker.SourceFile.TYPE_BUILDFILE)
+
+    for s in srcTree.files(*types):
+        pdbg("Procesing: %s" % s)
+        processor = s.processor(args.dry_run)
+        try:
+            replacement = None
+            while True:
+                original = processor.send(replacement)
+                if original:
+                    replacement = correspondences.fix_source_line(original, s.fileType)
+                else:
+                    replacement = None
+        except StopIteration:
+            pdbg("ended processing of '%s'" % s)
+            pass
 if __name__ == "__main__":
     import sys
     parser = argparse.ArgumentParser()

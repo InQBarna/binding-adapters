@@ -3,6 +3,7 @@ import os.path
 import re
 from logger import *
 import io
+import itertools
 
 class SourceTree:
     __srcfile_path_name_regex = re.compile(r".*\.(?:java|kt)\b$")
@@ -17,6 +18,19 @@ class SourceTree:
                 pinfo("Discarding source dir: %s" % tgt)
                 return True
         return False
+
+    def files(self, *types):
+        res = None
+        if SourceFile.TYPE_SRC in types:
+            pdbg("Adding files iterator")
+            res = itertools.chain(res, self.sourcefiles()) if res else self.sourcefiles()
+
+        if SourceFile.TYPE_BUILDFILE in types:
+            pdbg("Adding buildfiles iterator")
+            res = itertools.chain(res, self.buildfiles()) if res else self.buildfiles()
+
+        pdbg("Will return: " + repr(res))
+        return res if res else []
 
     def sourcefiles(self):
         return self._iterate_over_sources(SourceTree.__srcfile_path_name_regex, lambda path: SourceFile(path, SourceFile.TYPE_SRC))
@@ -38,10 +52,10 @@ class SourceFile:
 
     def __init__(self, path, fileType):
         self._path = path
-        self._fileType = fileType
+        self.fileType = fileType
 
     def __str__(self):
-        return "Source file at '%s' type = %s" % (self._path, self._fileType)
+        return "Source file at '%s' type = %s" % (self._path, self.fileType)
 
     def _open_write_path(self, dryRun):
         if dryRun:
