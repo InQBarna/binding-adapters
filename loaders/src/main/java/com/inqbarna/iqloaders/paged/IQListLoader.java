@@ -1,8 +1,8 @@
 package com.inqbarna.iqloaders.paged;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.support.v4.os.OperationCanceledException;
+import androidx.annotation.Nullable;
+import androidx.core.os.OperationCanceledException;
 
 import com.inqbarna.common.paging.PaginatedList;
 import com.inqbarna.iqloaders.IQLoader;

@@ -1,6 +1,6 @@
 package com.inqbarna.adapters;
 
-import android.support.annotation.LayoutRes;
+import androidx.annotation.LayoutRes;
 
 /**
  * @author David García <david.garcia@inqbarna.com>

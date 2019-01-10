@@ -1,6 +1,6 @@
 package com.inqbarna.libsamples
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import com.google.common.collect.Collections2
 import com.google.common.truth.IterableSubject
 import com.google.common.truth.Truth.assertThat

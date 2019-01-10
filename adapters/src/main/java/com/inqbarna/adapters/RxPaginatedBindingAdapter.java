@@ -1,6 +1,6 @@
 package com.inqbarna.adapters;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.inqbarna.common.paging.PaginateConfig;
 import com.inqbarna.common.paging.PaginatedAdapterDelegate;

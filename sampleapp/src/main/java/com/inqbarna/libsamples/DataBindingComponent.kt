@@ -7,5 +7,5 @@ import dagger.Component
  * @version 1.0 04/05/2018
  */
 @Component
-interface DataBindingComponent : android.databinding.DataBindingComponent {
+interface DataBindingComponent : androidx.databinding.DataBindingComponent {
 }

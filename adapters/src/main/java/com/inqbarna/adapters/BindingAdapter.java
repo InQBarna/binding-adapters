@@ -1,11 +1,11 @@
 package com.inqbarna.adapters;
 
-import android.arch.lifecycle.LifecycleOwner;
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import com.google.common.base.Preconditions;
@@ -101,7 +101,7 @@ public abstract class BindingAdapter extends RecyclerView.Adapter<BindingHolder>
         return "0x" + Integer.toHexString(holder.hashCode());
     }
 
-    public void setOverrideComponent(android.databinding.DataBindingComponent overrideComponent) {
+    public void setOverrideComponent(androidx.databinding.DataBindingComponent overrideComponent) {
         mAdapterDelegate.setOverrideComponent(overrideComponent);
     }
 

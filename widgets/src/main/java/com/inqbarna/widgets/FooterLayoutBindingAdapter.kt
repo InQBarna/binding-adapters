@@ -1,6 +1,6 @@
 package com.inqbarna.widgets
 
-import android.databinding.*
+import androidx.databinding.*
 
 /**
  * @author David García (david.garcia@inqbarna.com)

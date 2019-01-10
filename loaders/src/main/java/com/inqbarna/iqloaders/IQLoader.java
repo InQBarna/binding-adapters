@@ -1,7 +1,7 @@
 package com.inqbarna.iqloaders;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
+import androidx.loader.content.AsyncTaskLoader;
 
 /**
  * IQLoader allows to load every type of data asynchronously.
