@@ -2,12 +2,13 @@ package android.support.design.widget
 
 import android.content.Context
 import android.graphics.Rect
-import android.support.v4.view.GravityCompat
-import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
 import com.inqbarna.widgets.R
 import timber.log.Timber
 
@@ -15,6 +16,7 @@ import timber.log.Timber
  * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 24/03/2018
  */
+@Deprecated("Use Bottom App Bar instead")
 class BottomOffsetBehavior : CoordinatorLayout.Behavior<View> {
 
     private val targetId: Int
@@ -40,8 +42,8 @@ class BottomOffsetBehavior : CoordinatorLayout.Behavior<View> {
         ta.recycle()
     }
 
-    override fun layoutDependsOn(parent: CoordinatorLayout?, child: View?, dependency: View?): Boolean {
-        return targetId != 0 && targetId == dependency?.id
+    override fun layoutDependsOn(parent: CoordinatorLayout, child: View, dependency: View): Boolean {
+        return targetId != 0 && targetId == dependency.id
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, child: View, dependency: View): Boolean {
@@ -94,7 +96,14 @@ class BottomOffsetBehavior : CoordinatorLayout.Behavior<View> {
 
     private fun getOrCreate(child: View): ViewOffsetHelper {
         if (null == offsetHelper) {
-            offsetHelper = ViewOffsetHelper(child)
+            offsetHelper = object : ViewOffsetHelper {
+                override var topAndBottomOffset: Int = 0
+                override var leftAndRightOffset: Int = 0
+
+                override fun onViewLayout() {
+                    TODO("not implemented, use proper material component replacement (Bottom App Bar)")
+                }
+            }
         }
         return offsetHelper!!
     }
@@ -146,5 +155,13 @@ class BottomOffsetBehavior : CoordinatorLayout.Behavior<View> {
 
     private fun resolveGravity(gravity: Int): Int {
         return if (gravity == Gravity.NO_GRAVITY) GravityCompat.START or Gravity.TOP else gravity
+    }
+    
+    private interface ViewOffsetHelper {
+        var topAndBottomOffset: Int
+        var leftAndRightOffset: Int
+
+        fun onViewLayout()
+
     }
 }

@@ -1,6 +1,6 @@
 package com.inqbarna.libsamples
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import com.google.common.collect.Collections2
 import com.google.common.truth.IterableSubject
 import com.google.common.truth.Truth.assertThat
@@ -15,7 +15,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.android.util.concurrent.RoboExecutorService
-import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowLog
 import timber.log.Timber
 import java.util.concurrent.ExecutorService
@@ -25,7 +24,6 @@ import java.util.concurrent.ExecutorService
  * @version 1.0 23/02/2018
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class)
 class BindingAdapterTest {
 
 

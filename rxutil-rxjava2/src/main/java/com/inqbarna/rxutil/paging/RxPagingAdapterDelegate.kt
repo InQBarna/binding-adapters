@@ -1,6 +1,6 @@
 package com.inqbarna.rxutil.paging
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import com.inqbarna.common.paging.PaginatedAdapterDelegate
 import com.inqbarna.common.paging.PaginatedList
 import io.reactivex.Emitter

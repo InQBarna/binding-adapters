@@ -44,40 +44,42 @@ android {
 dependencies {
     implementation project(':adapters')
     implementation project(':widgets')
-    androidTestImplementation("com.android.support.test.espresso:espresso-core:$espressoVersion", {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    implementation "com.android.support:appcompat-v7:${supportLibsVersion}"
-    implementation "com.android.support:recyclerview-v7:${supportLibsVersion}"
-    implementation "com.android.support:design:${supportLibsVersion}"
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
 
-    implementation "com.jakewharton.timber:timber:$timberVersion"
-    implementation "io.reactivex:rxjava:${rootProject.ext.rxJavaVersion}"
-    implementation "com.github.akarnokd:rxjava2-interop:0.12.4"
+    implementation libraries.support.appCompat
+    implementation libraries.support.recyclerView
+    implementation libraries.support.design
+    implementation libraries.android.constraintLayout
 
-    kapt 'com.jakewharton:butterknife-compiler:8.8.1'
-    implementation 'com.jakewharton:butterknife:8.8.1'
+    implementation libraries.jake.timber
+    implementation libraries.rxJava.base
+    implementation libraries.rxJava2.interop
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "com.google.dagger:dagger:${rootProject.ext.daggerVersion}"
-    kapt "com.google.dagger:dagger-compiler:${rootProject.ext.daggerVersion}"
+    kapt libraries.jake.butterKnifeCompiler
+    implementation libraries.jake.butterKnife
+
+    implementation libraries.kotlin.jdk8
+    implementation libraries.dagger.base
+    kapt libraries.dagger.compiler
 
 
 
-    testImplementation "junit:junit:$jUnitVersion"
-    testImplementation 'org.mockito:mockito-core:2.12.0'
-    testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.0-beta.5'
-    testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.0-beta.5'
-    testImplementation group: 'org.powermock', name: 'powermock-module-junit4-rule', version: '2.0.0-beta.5'
-    testImplementation group: 'org.powermock', name: 'powermock-classloading-xstream', version: '2.0.0-beta.5'
-    testImplementation ('com.google.truth:truth:0.39') {
+    testImplementation testLibraries.junit
+    testImplementation testLibraries.mockito.base
+    testImplementation testLibraries.powermock.api
+    testImplementation testLibraries.powermock.junit4
+    testImplementation testLibraries.powermock.junit4Rule
+    testImplementation testLibraries.powermock.classloadingXstream
+    testImplementation (testLibraries.truth) {
         exclude group: 'com.google.guava'
         exclude group: 'com.google.errorprone'
     }
-    testImplementation "org.robolectric:robolectric:3.5.1"
-    testImplementation "org.robolectric:shadows-supportv4:3.7.1"
-    testImplementation "org.robolectric:shadows-multidex:3.7.1"
+    testImplementation testLibraries.robolectric.base
+    testImplementation testLibraries.robolectric.shadowsSupport
+    testImplementation testLibraries.robolectric.shadowsMultidex
+
+    androidTestImplementation(testLibraries.espresso, {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
 }
 repositories {
     mavenCentral()

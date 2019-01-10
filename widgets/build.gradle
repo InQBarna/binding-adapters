@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-kapt' // for databinding which gets automatically inserted in annotationProcessor
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -30,8 +30,7 @@ android {
 }
 
 dependencies {
-    implementation "com.android.support:design:${supportLibsVersion}"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compileOnly "com.jakewharton.timber:timber:${timberVersion}"
-//    kapt "com.android.databinding:compiler:${plugin_version}"
+    implementation libraries.support.design
+    implementation libraries.kotlin.jdk8
+    compileOnly libraries.jake.timber
 }

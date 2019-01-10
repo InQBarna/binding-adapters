@@ -1,7 +1,7 @@
 package com.inqbarna.adapters;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;

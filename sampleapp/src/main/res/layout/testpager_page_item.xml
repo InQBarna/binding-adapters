@@ -3,7 +3,7 @@
     <data>
         <variable name="model" type="com.inqbarna.libsamples.TestPagerAdapter.PageVM"/>
     </data>
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
                                              android:layout_width="match_parent"
                                              android:layout_height="match_parent">
 
@@ -17,5 +17,5 @@
               tools:text="Sample item"
     />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

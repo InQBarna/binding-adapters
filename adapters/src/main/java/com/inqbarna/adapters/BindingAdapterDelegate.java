@@ -1,13 +1,13 @@
 package com.inqbarna.adapters;
 
-import android.databinding.DataBindingUtil;
+import androidx.databinding.DataBindingUtil;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 
 class BindingAdapterDelegate {
     private       ItemBinder                               mItemBinder;
-    private       android.databinding.DataBindingComponent mOverrideComponent;
+    private       androidx.databinding.DataBindingComponent mOverrideComponent;
 
     BindingAdapterDelegate() {
     }
@@ -22,7 +22,7 @@ class BindingAdapterDelegate {
         }
         checkBinder();
 
-        final android.databinding.ViewDataBinding dataBinding;
+        final androidx.databinding.ViewDataBinding dataBinding;
         if (null == mOverrideComponent) {
             dataBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), viewType, parent, false);
         } else {
@@ -31,7 +31,7 @@ class BindingAdapterDelegate {
         return new com.inqbarna.adapters.BindingHolder(dataBinding);
     }
 
-    void setOverrideComponent(android.databinding.DataBindingComponent overrideComponent) {
+    void setOverrideComponent(androidx.databinding.DataBindingComponent overrideComponent) {
         mOverrideComponent = overrideComponent;
     }
 

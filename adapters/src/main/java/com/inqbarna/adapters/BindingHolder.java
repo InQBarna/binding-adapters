@@ -1,10 +1,10 @@
 package com.inqbarna.adapters;
 
-import android.arch.lifecycle.LifecycleOwner;
-import android.databinding.ViewDataBinding;
-import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
-import android.support.v7.widget.RecyclerView;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.databinding.ViewDataBinding;
+import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Collection;
 

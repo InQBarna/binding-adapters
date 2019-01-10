@@ -1,8 +1,8 @@
 package com.inqbarna.adapters
 
-import android.databinding.DataBindingUtil
-import android.databinding.ViewDataBinding
-import android.support.v4.view.PagerAdapter
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
+import androidx.viewpager.widget.PagerAdapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +13,7 @@ import kotlin.properties.Delegates
  * @version 1.0 11/10/2017
  */
 
-open class BasicPagerAdapter<T : TypeMarker> @JvmOverloads constructor(varId : Int, items : List<T> = emptyList(), bindingComponent : android.databinding.DataBindingComponent?
+open class BasicPagerAdapter<T : TypeMarker> @JvmOverloads constructor(varId : Int, items : List<T> = emptyList(), bindingComponent : androidx.databinding.DataBindingComponent?
  = null) : BindingPagerAdapter<T>(varId, bindingComponent) {
     var items : List<T> by Delegates.observable(items) { _, _, _ -> notifyDataSetChanged() }
 
@@ -54,7 +54,7 @@ open class BasicPagerAdapter<T : TypeMarker> @JvmOverloads constructor(varId : I
 abstract class BindingPagerAdapter<T : TypeMarker>() : PagerAdapter() {
     private val helper : PagerAdapterHelper = PagerAdapterHelper()
 
-    @JvmOverloads constructor(varId : Int, bindingComponent : android.databinding.DataBindingComponent? = null) : this() {
+    @JvmOverloads constructor(varId : Int, bindingComponent : androidx.databinding.DataBindingComponent? = null) : this() {
         setBinder(BasicItemBinder(varId))
         bindingComponent?.also { setBindingComponent(it) }
     }
@@ -63,7 +63,7 @@ abstract class BindingPagerAdapter<T : TypeMarker>() : PagerAdapter() {
         helper.binder = binder
     }
 
-    protected fun setBindingComponent(bindingComponent : android.databinding.DataBindingComponent) {
+    protected fun setBindingComponent(bindingComponent : androidx.databinding.DataBindingComponent) {
         helper.bindingComponent = bindingComponent
     }
 
@@ -109,7 +109,7 @@ abstract class BindingPagerAdapter<T : TypeMarker>() : PagerAdapter() {
 }
 
 
-internal class PagerAdapterHelper(var bindingComponent : android.databinding.DataBindingComponent? = null) {
+internal class PagerAdapterHelper(var bindingComponent : androidx.databinding.DataBindingComponent? = null) {
     internal lateinit var binder : ItemBinder
     fun isViewFromObject(view : View, any : Any) : Boolean = if (any is ViewDataBinding) any == DataBindingUtil.getBinding(view) else false
 

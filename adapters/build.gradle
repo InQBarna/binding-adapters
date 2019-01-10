@@ -31,15 +31,11 @@ android {
 dependencies {
 	api project(':common')
     api project(':rxutil-rxjava2')
-    api (group: 'com.google.guava', name: 'guava', version: '25.1-android')
-    api group: 'com.google.code.findbugs', name: 'jsr305', version: '2.0.1'
-    api group: 'io.reactivex.rxjava2', name: 'rxjava', version: rxJava2Version
+    api libraries.guava.base
+    api libraries.rxJava2.base
 
-    // Android databinding
-//    kapt "com.android.databinding:compiler:$plugin_version"
-
-    compileOnly "com.jakewharton.timber:timber:${timberVersion}"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "com.android.support:support-v4:${supportLibsVersion}"
-    implementation "com.android.support:recyclerview-v7:${supportLibsVersion}"
+    compileOnly libraries.jake.timber
+    implementation libraries.kotlin.jdk8
+    implementation libraries.support.v4
+    implementation libraries.support.recyclerView
 }

@@ -3,15 +3,15 @@
     <data>
         <variable name="model" type="com.inqbarna.libsamples.TestBottomVM"/>
     </data>
-    <android.support.design.widget.CoordinatorLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.RecyclerView android:layout_width="match_parent" android:layout_height="match_parent"
+        <androidx.recyclerview.widget.RecyclerView android:layout_width="match_parent" android:layout_height="match_parent"
                                                 android:id="@+id/the_list"
                                                 app:behavior_scrolling_view_id="@id/the_footer"
                                                 android:adapter="@{model.adapter}"
-                                                app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+                                                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                                                 app:layout_behavior="android.support.design.widget.BottomOffsetBehavior"
         />
 
@@ -32,5 +32,5 @@
             />
         </com.inqbarna.widgets.FooterLayout>
 
-    </android.support.design.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
