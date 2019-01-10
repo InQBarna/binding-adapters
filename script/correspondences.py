@@ -31,11 +31,11 @@ class Correspondences:
                     praw("rowFrom = %s" % row[fromKey])
                     self._mapping[row[fromKey]] = row[toKey]
 
-        for f,t in self._mapping.items():
-            pdbg("From '%s' -> '%s'" % (f, t))
-            srcPkg = Correspondences._get_package(f)
-            if srcPkg not in self._package_mapping:
-                self._package_mapping.append(_PackageReplacement(srcPkg, Correspondences._get_package(t)))
+#        for f,t in self._mapping.items():
+#            pdbg("From '%s' -> '%s'" % (f, t))
+#            srcPkg = Correspondences._get_package(f)
+#            if srcPkg not in self._package_mapping:
+#                self._package_mapping.append(_PackageReplacement(srcPkg, Correspondences._get_package(t)))
 
         
         with urllib.request.urlopen(self.artifact_url) as response:
@@ -49,8 +49,8 @@ class Correspondences:
                         toKey = mapping.fieldnames[1]
                     self._artifact_replacements.append(_ArtifactReplacement(row[fromKey], row[toKey]))
 
-        for repl in self._package_mapping:
-            pdbg(str(repl))
+        for key,repl in self._mapping.items():
+            pdbg("%s -> %s" %(key, repl))
 
         for repl in self._artifact_replacements:
             pdbg(str(repl))
@@ -72,13 +72,19 @@ class Correspondences:
                return vrepl
         return None
 
+    def _package_match_replacement(self, matchobj):
+        matched = matchobj[0]
+        if not matched in self._mapping:
+            pdbg("Ignoring package replacement for '%s'" % matched)
+            return matched
+        else:
+            return self._mapping[matched]
+
+    _qname_regex = re.compile(r"(?:\w[\w0-9]*\.)+(?:\w[\w0-9]*)")
     def fix_source_line(self, srcline, srcType):
         result = srcline
         if srcType == SourceFile.TYPE_SRC:
-            for repl in self._package_mapping:
-                result = repl.do_replace(result)
-
-            return result
+            return Correspondences._qname_regex.sub(self._package_match_replacement, result)
         elif srcType == SourceFile.TYPE_BUILDFILE:
             res = None
             for repl in self._artifact_replacements:
@@ -92,9 +98,6 @@ class Correspondences:
             return srcline
         else:
             raise ValueError("Invalid file type %s" % srcType)
-
-    def _get_package(val):
-        return ".".join(val.split('.')[:-1]) + "."
 
 
 class _ArtifactReplacement:
@@ -194,10 +197,10 @@ class _VersionReplacement:
         return "Version replacement on '%s:%d'. Varname = %s, Substitution: %s" % (self._srcFile._path, self._lineNo, self._varName, self._substitution)
 
 class _PackageReplacement:
-    def __init__(self, srcPackage, dstPackage):
-        escaped = re.escape(srcPackage)
+    def __init__(self, srcClass, dstClass):
+        escaped = re.escape(_PackageReplacement._get_package(srcClass))
         self._matcher = re.compile(f"{escaped}(\w+)", re.ASCII)
-        self._dstPackage = dstPackage
+        self._dstPackage = dstClass
 
     def __str__(self):
         return f"Matcher={self._matcher} ==> Replaces to: {self._dstPackage}"
@@ -206,6 +209,9 @@ class _PackageReplacement:
         replacement = self._dstPackage + matchobj.group(1)
         praw("Changed '%s' with '%s'" % (matchobj.group(0), replacement))
         return replacement
+
+    def _get_package(val):
+        return ".".join(val.split('.')[:-1]) + "."
 
     def do_replace(self, srcLine):
         return self._matcher.sub(self._target_replace, srcLine)
