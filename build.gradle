@@ -36,6 +36,7 @@ ext {
 allprojects {
     repositories {
         google()
+        mavenCentral()
         jcenter()
     }
 }
