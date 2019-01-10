@@ -21,7 +21,7 @@ ext {
             powerMockVersion: "2.0.0-beta.5",
             mockito: "2.12.0",
             truthVersion: "0.42",
-            robolectricVersion: "3.5.1",
+            robolectricVersion: "4.1",
             shadowsVersion: "3.7.1",
             espressoCoreVersion: "3.1.0",
             runnerVersion: "1.1.0"
