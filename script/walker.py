@@ -8,7 +8,8 @@ import itertools
 class SourceTree:
     __srcfile_path_name_regex = re.compile(r".*\.(?:java|kt)\b$")
     __buildfile_path_name_regex = re.compile(r".*\.gradle\b$")
-    __configfile_path_name_regex = re.compile(r"gradle\.properties")
+    __configfile_path_name_regex = re.compile(r".*/?gradle\.properties\b")
+    __ui_path_name_regex = re.compile(r".*res/.*\.xml\b")
     def __init__(self, root, excludes):
         self._root = root
         self._excludes = excludes
@@ -35,6 +36,10 @@ class SourceTree:
             pdbg("Adding configs iterator")
             regexes.append((SourceTree.__configfile_path_name_regex, SourceFile.TYPE_CONFIG))
 
+        if SourceFile.TYPE_UI in types:
+            pdbg("Adding UI files")
+            regexes.append((SourceTree.__ui_path_name_regex, SourceFile.TYPE_UI))
+
         praw("Will return: " + repr(res))
         return self._iterate_over_sources(regexes) if len(regexes) > 0 else []
 
@@ -49,7 +54,7 @@ class SourceTree:
 
         regexes = [r[0] for r in regex_type_combo]
         for root, dirs, files in os.walk(self._root):
-            source_candidates = [(f,t[1]) for t in rtc for f in files if t[0].match(f)]
+            source_candidates = [(f,t[1]) for t in rtc for f in files if t[0].match(os.path.join(root, f))]
             dirs[:] = [d for d in dirs if not self._should_discard(os.path.join(root, d))]
 
             for s in source_candidates:
@@ -62,6 +67,7 @@ class SourceFile:
     TYPE_SRC="source"
     TYPE_BUILDFILE="buildfile"
     TYPE_CONFIG="config"
+    TYPE_UI="ui"
 
     def __init__(self, path, fileType):
         self._path = path

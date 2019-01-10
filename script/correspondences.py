@@ -83,7 +83,7 @@ class Correspondences:
     _qname_regex = re.compile(r"(?:\w[\w0-9]*\.)+(?:\w[\w0-9]*)")
     def fix_source_line(self, srcline, srcType):
         result = srcline
-        if srcType == SourceFile.TYPE_SRC:
+        if srcType == SourceFile.TYPE_SRC or srcType == SourceFile.TYPE_UI:
             return Correspondences._qname_regex.sub(self._package_match_replacement, result)
         elif srcType == SourceFile.TYPE_BUILDFILE:
             res = None

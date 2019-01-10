@@ -40,6 +40,9 @@ def main(args):
         types.append(walker.SourceFile.TYPE_BUILDFILE)
         types.append(walker.SourceFile.TYPE_CONFIG)
 
+    if not args.no_ui:
+        types.append(walker.SourceFile.TYPE_UI)
+
     for s in srcTree.files(*types):
         if args.affected_files:
             print("Would check %s" % s)
@@ -70,6 +73,7 @@ if __name__ == "__main__":
     parser.add_argument("--no-source", help="Disable source files parsing", action="store_true", required=False)
     parser.add_argument("--no-buildfiles", help="Disable build files parsing", action="store_true", required=False)
     parser.add_argument("--affected-files", help="Just print files that would be changed and exits", action="store_true", required=False)
+    parser.add_argument("--no-ui", help="Disable UI files a.k.a XML files", action="store_true", required=False)
     args = parser.parse_args()
 
     del sys.argv[1:]

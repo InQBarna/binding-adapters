@@ -13,7 +13,7 @@ ext {
             daggerVersion: "2.19",
             rxJava2Version: "2.2.4",
             rxJava2AndroidVersion: "2.1.0",
-            guavaVersion: "27.0-android",
+            guavaVersion: "27.0.1-android",
             reactiveStreamsVersion: "1.0.2",
             kotlinCoroutinesVersion: "1.0.1",
 
