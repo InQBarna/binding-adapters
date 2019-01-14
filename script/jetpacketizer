@@ -7,9 +7,6 @@ import walker
 from logger import *
 import re
 
-
-
-
 def dir_check(dname):
     if not os.path.exists(dname):
         raise argparse.ArgumentTypeError("%s is not a valid directory" % dname)
@@ -29,7 +26,7 @@ def main(args):
 
     pinfo("Will open url '%s'" % args.url)
 
-    correspondences = correspondences.Correspondences(args.url, args.artifact_url)
+    androidx_correspondences = correspondences.Correspondences(args.url, args.artifact_url)
 
     srcTree = walker.SourceTree(args.src, args.exclude_dir)
     types = []
@@ -43,6 +40,7 @@ def main(args):
     if not args.no_ui:
         types.append(walker.SourceFile.TYPE_UI)
 
+    notes = []
     for s in srcTree.files(*types):
         if args.affected_files:
             print("Would check %s" % s)
@@ -52,14 +50,20 @@ def main(args):
             try:
                 replacement = None
                 while True:
-                    original = processor.send(replacement)
-                    if original:
-                        replacement = correspondences.fix_source_line(original, s.fileType)
-                    else:
-                        replacement = None
+                    try:
+                        original = processor.send(replacement)
+                        if original:
+                            replacement = androidx_correspondences.fix_source_line(original, s.fileType)
+                        else:
+                            replacement = None
+                    except correspondences.ProcessingError as pe:
+                        notes.append((s, pe.message))
             except StopIteration:
                 pinfo("ended processing of '%s'" % s)
                 pass
+
+    for source, msg in notes:
+        pwarn("Issue in %s: %s" % (source._path, msg))
 
 if __name__ == "__main__":
     import sys

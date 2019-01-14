@@ -4,7 +4,12 @@ import io
 import re
 from walker import SourceFile
 from logger import *
+from collections.abc import MutableMapping
 
+
+class ProcessingError(Exception):
+    def __init__(self, msg):
+        self.message = msg
 
 class Correspondences:
     def __init__(self, url, artifact_url):
@@ -14,6 +19,7 @@ class Correspondences:
         self._package_mapping = []
         self._artifact_replacements = []
         self._version_replacements = []
+        self._star_projections = _StarProjections()
         self._do_create_correspondences()
 
     def _do_create_correspondences(self):
@@ -29,15 +35,13 @@ class Correspondences:
                         pdbg("FromKey = %s" % fromKey)
                         pdbg("ToKey = %s" % toKey)
                     praw("rowFrom = %s" % row[fromKey])
-                    self._mapping[row[fromKey]] = row[toKey]
+                    srcClass = row[fromKey]
+                    dstClass = row[toKey]
+                    self._mapping[srcClass] = dstClass
+                    srcPkg = _get_package(srcClass)
+                    dstPkg = _get_package(dstClass)
+                    self._star_projections.add(srcPkg, dstPkg)
 
-#        for f,t in self._mapping.items():
-#            pdbg("From '%s' -> '%s'" % (f, t))
-#            srcPkg = Correspondences._get_package(f)
-#            if srcPkg not in self._package_mapping:
-#                self._package_mapping.append(_PackageReplacement(srcPkg, Correspondences._get_package(t)))
-
-        
         with urllib.request.urlopen(self.artifact_url) as response:
             with io.TextIOWrapper(response) as content:
                 mapping = csv.DictReader(content)
@@ -51,6 +55,12 @@ class Correspondences:
 
         for key,repl in self._mapping.items():
             pdbg("%s -> %s" %(key, repl))
+
+        for key, destinations in self._star_projections:
+            if (len(destinations) > 1):
+                pdbg(f"Source package '{key}' maps to more than one destination: {destinations}")
+            else:
+                pdbg(f"Source package '{key}*' can be replaced with {destinations[0]}*")
 
         for repl in self._artifact_replacements:
             pdbg(str(repl))
@@ -74,13 +84,19 @@ class Correspondences:
 
     def _package_match_replacement(self, matchobj):
         matched = matchobj[0]
-        if not matched in self._mapping:
-            pdbg("Ignoring package replacement for '%s'" % matched)
-            return matched
-        else:
-            return self._mapping[matched]
+        subst = self._mapping.get(matched)
+        if subst:
+            praw(f"Subst '{matched}' with '{subst}'")
+            return subst
 
-    _qname_regex = re.compile(r"(?:\w[\w0-9]*\.)+(?:\w[\w0-9]*)")
+        star_replacement = self._star_projections.unique_star_projection(matched)
+        if star_replacement:
+            praw(f"Star-Subst '{matched}' with '{star_replacement}'")
+            return star_replacement
+
+        return matched
+
+    _qname_regex = re.compile(r"(?:\w[\w0-9]*\.)+(?:\w[\w0-9]*|\*{1})")
     def fix_source_line(self, srcline, srcType):
         result = srcline
         if srcType == SourceFile.TYPE_SRC or srcType == SourceFile.TYPE_UI:
@@ -99,6 +115,37 @@ class Correspondences:
         else:
             raise ValueError("Invalid file type %s" % srcType)
 
+def _get_package(val):
+    return ".".join(val.split('.')[:-1]) + "."
+
+class _StarProjections():
+    def __init__(self):
+        self._data = {}
+
+    def add(self, srcPkg, dstPkg):
+        tgt = self._data.get(srcPkg)
+        if not tgt:
+            tgt = []
+            self._data[srcPkg] = tgt
+
+        if dstPkg not in tgt:
+            tgt.append(dstPkg)
+
+    def unique_star_projection(self, source):
+        if not source.endswith("*"):
+            return None
+        src = _get_package(source)
+        items = self._data.get(src)
+        if items:
+            if len(items) == 1:
+                return items[0] + "*"
+            else:
+                raise ProcessingError(f"package projection '{source}' has multiple targets on AndroidX namespace")
+
+        return None
+
+    def __iter__(self):
+        yield from self._data.items()
 
 class _ArtifactReplacement:
     def __init__(self, artifactSrc, artifactDst):
@@ -198,7 +245,7 @@ class _VersionReplacement:
 
 class _PackageReplacement:
     def __init__(self, srcClass, dstClass):
-        escaped = re.escape(_PackageReplacement._get_package(srcClass))
+        escaped = re.escape(_get_package(srcClass))
         self._matcher = re.compile(f"{escaped}(\w+)", re.ASCII)
         self._dstPackage = dstClass
 
@@ -209,9 +256,6 @@ class _PackageReplacement:
         replacement = self._dstPackage + matchobj.group(1)
         praw("Changed '%s' with '%s'" % (matchobj.group(0), replacement))
         return replacement
-
-    def _get_package(val):
-        return ".".join(val.split('.')[:-1]) + "."
 
     def do_replace(self, srcLine):
         return self._matcher.sub(self._target_replace, srcLine)
