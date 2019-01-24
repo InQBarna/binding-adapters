@@ -58,6 +58,7 @@ def main(args):
                             replacement = None
                     except correspondences.ProcessingError as pe:
                         notes.append((s, pe.message))
+                        replacement = original
             except StopIteration:
                 pinfo("ended processing of '%s'" % s)
                 pass
