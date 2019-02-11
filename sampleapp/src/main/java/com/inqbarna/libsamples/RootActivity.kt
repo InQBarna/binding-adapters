@@ -3,9 +3,11 @@ package com.inqbarna.libsamples
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -181,6 +183,12 @@ class OffsetsActivity : ListBaseActivity<OffsetItem>() {
             bottom = verticalDps.toPx(res)
         }
     }
+
+    private fun Int.toPx(resources: Resources) = TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        toFloat(),
+        resources.displayMetrics
+    ).toInt()
 
     override fun setupRecycler(recycler: RecyclerView) {
         recycler.run {
