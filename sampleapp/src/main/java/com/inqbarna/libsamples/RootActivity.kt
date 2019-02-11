@@ -1,16 +1,10 @@
 @file:JvmName("Root")
 package com.inqbarna.libsamples
 
-import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
-import android.graphics.Color
-import android.graphics.Rect
 import android.os.Bundle
-import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -62,75 +56,6 @@ open class RootActivity : ListBaseActivity<TargetActivity>(), Launcher {
     }
 }
 
-open class NumbersActivity : ListBaseActivity<NumberVM>() {
-
-    companion object {
-        fun getCallingIntent(context: Context) : Intent {
-            return Intent(context, NumbersActivity::class.java)
-        }
-    }
-
-
-    val toggler : Toggler = object : Toggler {
-        override fun toggleItem(groupItem: GroupIndicator) {
-            val head = groupItem as? GroupHead
-            if (null != head) {
-                val res = GroupController.updateGroupWithColor(itemList, head, head.groupSize(), !head.enabled(), head.attributes().color())
-                res.notifyOn(adapter)
-            }
-        }
-    }
-
-    override fun setupRecycler(recycler: RecyclerView) {
-        recycler.layoutManager = GridLayoutManager(this, 4)
-        recycler.addItemDecoration(GroupDecorator())
-    }
-
-    private val itemList: List<NumberVM> = createItems(1000)
-
-    override fun createAdapter(): BasicBindingAdapter<NumberVM> {
-        val adapter  = BasicBindingAdapter<NumberVM>(ItemBinder { variableBinding, pos, dataAtPos -> variableBinding.bindValue(BR.model, dataAtPos)})
-        adapter.setItems(itemList)
-        return adapter
-    }
-
-
-    private fun createItems(max: Int): MutableList<out NumberVM> {
-        val mutableList = MutableList<NumberVM>(max) {
-            NumberVM(it, toggler)
-        }
-        var vm = mutableList.get(4)
-        mutableList.set(4, HeadNumberVM(Color.GREEN, 8, vm))
-
-        vm = mutableList.get(23)
-        mutableList.set(23, HeadNumberVM(Color.BLUE, 11, vm))
-        return mutableList
-    }
-}
-
-open class NumberVM(val number : Int, internal val toggler: Toggler) : TypeMarker, GroupIndicator by BasicIndicatorDelegate() {
-
-    val numberStr: String
-        get() = number.toString()
-
-    override fun getItemType(): Int {
-        return R.layout.number_item
-    }
-
-    fun toggle(indicator: GroupIndicator) {
-        toggler.toggleItem(indicator)
-    }
-}
-
-class HeadNumberVM(color : Int, val size : Int, numberVM : NumberVM) : NumberVM(numberVM.number, numberVM.toggler), GroupHead {
-    init {
-        attributes().setColor(color)
-    }
-    override fun groupSize(): Int {
-        return size
-    }
-}
-
 class TargetActivity(val name: String, private val mIntent: Intent, private val mLauncher: Launcher) : TypeMarker {
 
     fun launch() {
@@ -142,83 +67,8 @@ class TargetActivity(val name: String, private val mIntent: Intent, private val 
     }
 }
 
-interface Toggler {
-    fun toggleItem(groupItem : GroupIndicator)
-}
-
 interface Launcher {
     fun launch(intent: Intent)
-}
-
-sealed class OffsetItem(
-    val label: String
-) : TypeMarker {
-    class Highlighted(text: String) : OffsetItem(text)
-    class Standard(text: String) : OffsetItem(text)
-    class Special(text: String) : OffsetItem(text)
-
-    override fun getItemType() = R.layout.offset_item
-}
-
-class OffsetsActivity : ListBaseActivity<OffsetItem>() {
-    private val items = createItems()
-
-    private val offsetsProvider = ItemOffsetProvider(items) { context: Context, rect: Rect ->
-        val res = context.resources
-        var horizontalDps = 10
-        var verticalDps = 5
-        when (this) {
-            is OffsetItem.Highlighted -> verticalDps = 30
-            is OffsetItem.Standard -> horizontalDps = 20
-            is OffsetItem.Special -> {
-                horizontalDps = 60
-                verticalDps = 40
-            }
-        }
-
-        with(rect) {
-            left = horizontalDps.toPx(res)
-            top = verticalDps.toPx(res)
-            right = horizontalDps.toPx(res)
-            bottom = verticalDps.toPx(res)
-        }
-    }
-
-    private fun Int.toPx(resources: Resources) = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP,
-        toFloat(),
-        resources.displayMetrics
-    ).toInt()
-
-    override fun setupRecycler(recycler: RecyclerView) {
-        recycler.run {
-            addOffsetDecoration(offsetsProvider)
-            layoutManager = LinearLayoutManager(recycler.context)
-        }
-    }
-
-
-    override fun createAdapter() =
-        BasicBindingAdapter<OffsetItem>(ItemBinder { variableBinding, pos, dataAtPos ->
-            variableBinding.bindValue(BR.model, dataAtPos)
-        }).apply {
-            setItems(items)
-        }
-
-    private fun createItems() = listOf(
-        OffsetItem.Highlighted("Highlighted 1"),
-        OffsetItem.Standard("Standard 1"),
-        OffsetItem.Standard("Standard 3"),
-        OffsetItem.Standard("Standard 4"),
-        OffsetItem.Special("Special 1")
-    )
-
-    companion object {
-        fun getCallingIntent(context: Context): Intent {
-            return Intent(context, OffsetsActivity::class.java)
-        }
-    }
-
 }
 
 class OptionsDelegate : ReadOnlyProperty<RootActivity, List<TargetActivity>> {
