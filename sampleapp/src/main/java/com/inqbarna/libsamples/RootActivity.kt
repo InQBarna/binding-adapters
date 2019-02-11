@@ -4,9 +4,11 @@ package com.inqbarna.libsamples
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Rect
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -146,12 +148,78 @@ interface Launcher {
     fun launch(intent: Intent)
 }
 
+sealed class OffsetItem(
+    val label: String
+) : TypeMarker {
+    class Highlighted(text: String) : OffsetItem(text)
+    class Standard(text: String) : OffsetItem(text)
+    class Special(text: String) : OffsetItem(text)
+
+    override fun getItemType() = R.layout.offset_item
+}
+
+class OffsetsActivity : ListBaseActivity<OffsetItem>() {
+    private val items = createItems()
+
+    private val offsetsProvider = ItemOffsetProvider(items) { context: Context, rect: Rect ->
+        val res = context.resources
+        var horizontalDps = 10
+        var verticalDps = 5
+        when (this) {
+            is OffsetItem.Highlighted -> verticalDps = 30
+            is OffsetItem.Standard -> horizontalDps = 20
+            is OffsetItem.Special -> {
+                horizontalDps = 60
+                verticalDps = 40
+            }
+        }
+
+        with(rect) {
+            left = horizontalDps.toPx(res)
+            top = verticalDps.toPx(res)
+            right = horizontalDps.toPx(res)
+            bottom = verticalDps.toPx(res)
+        }
+    }
+
+    override fun setupRecycler(recycler: RecyclerView) {
+        recycler.run {
+            addOffsetDecoration(offsetsProvider)
+            layoutManager = LinearLayoutManager(recycler.context)
+        }
+    }
+
+
+    override fun createAdapter() =
+        BasicBindingAdapter<OffsetItem>(ItemBinder { variableBinding, pos, dataAtPos ->
+            variableBinding.bindValue(BR.model, dataAtPos)
+        }).apply {
+            setItems(items)
+        }
+
+    private fun createItems() = listOf(
+        OffsetItem.Highlighted("Highlighted 1"),
+        OffsetItem.Standard("Standard 1"),
+        OffsetItem.Standard("Standard 3"),
+        OffsetItem.Standard("Standard 4"),
+        OffsetItem.Special("Special 1")
+    )
+
+    companion object {
+        fun getCallingIntent(context: Context): Intent {
+            return Intent(context, OffsetsActivity::class.java)
+        }
+    }
+
+}
+
 class OptionsDelegate : ReadOnlyProperty<RootActivity, List<TargetActivity>> {
     override fun getValue(thisRef: RootActivity, property: KProperty<*>): List<TargetActivity> {
         return listOf(
                 TargetActivity("Paging Adapter", MainActivity.getCallingIntent(thisRef), thisRef),
                 TargetActivity("Numbers Activity", NumbersActivity.getCallingIntent(thisRef), thisRef),
                 TargetActivity("Bottom Bar Progress", TestBottomSheetActivity.getCallingIntent(thisRef), thisRef),
+                TargetActivity("Dynamic Offset Items", OffsetsActivity.getCallingIntent(thisRef), thisRef),
                 TargetActivity("Test pager", TestPagerAdapter.getCallingIntent(thisRef), thisRef)
         )
     }

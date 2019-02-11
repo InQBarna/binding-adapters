@@ -20,6 +20,7 @@
         <activity android:name=".NumbersActivity"/>
         <activity android:name=".TestBottomSheetActivity"/>
         <activity android:name=".TestPagerAdapter"/>
+        <activity android:name=".OffsetsActivity"/>
     </application>
 
 </manifest>
