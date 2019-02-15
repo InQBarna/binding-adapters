@@ -21,7 +21,7 @@ import com.inqbarna.common.paging.PaginateConfig;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 19/9/16
  */
 

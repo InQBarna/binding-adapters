@@ -50,7 +50,7 @@ import io.reactivex.internal.disposables.DisposableHelper;
 import timber.log.Timber;
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 15/9/16
  */
 

@@ -35,7 +35,7 @@ import java.util.Set;
 
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 31/1/17
  */
 

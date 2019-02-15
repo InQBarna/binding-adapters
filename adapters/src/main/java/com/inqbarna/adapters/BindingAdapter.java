@@ -35,7 +35,7 @@ import java.util.Map;
 import timber.log.Timber;
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 6/9/16
  */
 public abstract class BindingAdapter extends RecyclerView.Adapter<BindingHolder> {

@@ -25,7 +25,7 @@ import android.view.ViewGroup
 import kotlin.properties.Delegates
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 11/10/2017
  */
 

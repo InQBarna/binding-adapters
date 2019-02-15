@@ -26,7 +26,7 @@ import java.util.List;
  * Created by Ricard on 14/9/15.
  *
  * @author Ricard
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  */
 public abstract class PaginatedRecyclerAdapter<T, VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
 

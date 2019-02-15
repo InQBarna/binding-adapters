@@ -26,7 +26,7 @@ import com.inqbarna.rxutil.paging.RxPagingCallback;
 import com.inqbarna.rxutil.paging.RxPagingConfig;
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 16/9/16
  */
 
