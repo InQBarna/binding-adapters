@@ -1,5 +1,17 @@
 apply plugin: 'com.android.library'
 
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.3'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+    }
+}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
@@ -33,4 +45,134 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testImplementation testLibraries.junit
+}
+
+// Create the pom configuration:
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "davidgarcia"
+            name "David García"
+            email "david.garcia@inqbarna.com"
+        }
+    }
+
+    scm {
+        url "http://gitlab.inqbarna.com/contrib/android-loaders"
+    }
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.source
+}
+
+if (project.hasProperty('bintrayUser')) {
+
+    apply plugin: "com.jfrog.bintray"
+    apply plugin: 'maven-publish'
+//    apply plugin: 'com.github.dcendents.android-maven'
+
+    task javadoc(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    publishing {
+        publications {
+            LibraryPublication(MavenPublication) {
+                groupId = 'com.inqbarna.util'
+                artifactId = 'common'
+                version = '1.0.0'
+                artifacts {
+                    archives androidSourcesJar
+                    archives javadocJar
+                }
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    configurations.implementation.allDependencies.each {
+                        if (it.name != 'unspecified') {
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', it.group)
+                            dependencyNode.appendNode('artifactId', it.name)
+                            dependencyNode.appendNode('version', it.version)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+//    install {
+//        repositories.mavenInstaller {
+//            pom.project {
+//                packaging 'aar'
+//                groupId 'com.inqbarna.util'
+//                artifactId 'common'
+//
+//                name 'Util Commons'
+//                description 'InQBarna Utilities common stuff'
+//                url 'http://gitlab.inqbarna.com/contrib/android-loaders'
+//
+//                licenses {
+//                    license {
+//                        name 'The Apache Software License, Version 2.0'
+//                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                    }
+//                }
+//                developers {
+//                    developer {
+//                        id 'davidgarcia'
+//                        name 'David Garía'
+//                        email 'david.garcia@inqbarna.com'
+//                    }
+//                }
+//                scm {
+//                    connection 'http://gitlab.inqbarna.com/contrib/android-loaders.git'
+//                    developerConnection 'http://gitlab.inqbarna.com/contrib/android-loaders.git'
+//                    url 'http://gitlab.inqbarna.com/contrib/android-loaders'
+//                }
+//            }
+//        }
+//    }
+//    task sourcesJar(type: Jar) {
+//        classifier = 'sources'
+//        from android.sourceSets.main.java.srcDirs
+//    }
+//
+
+//
+//    artifacts {
+//        archives javadocJar
+//        archives sourcesJar
+//    }
+
+    bintray {
+        user = project.property('bintrayUser')
+        key = project.property('bintrayKey')
+        configurations = ['archives']
+        publications = ['LibraryPublication']
+        pkg {
+            repo = 'utilities'
+            name = 'common'
+            userOrg = 'inqbarna-oss'
+            licenses = ['Apache-2.0']
+            vcsUrl = 'http://gitlab.inqbarna.com/contrib/android-loaders.git'
+            version {
+                name = "1.0.0"
+            }
+        }
+    }
 }
