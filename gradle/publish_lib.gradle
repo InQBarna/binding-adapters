@@ -30,9 +30,20 @@ task javadoc(type: Javadoc) {
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+task javadocJar(type: Jar, dependsOn: dokka) {
     classifier = 'javadoc'
-    from javadoc.destinationDir
+    from "$buildDir/dokka"
+}
+
+
+def printObj = { o ->
+    def filtered = ['class', 'active']
+
+    println o.properties
+            .sort { it.key }
+            .collect { it }
+            .findAll { !filtered.contains(it.key) }
+            .join('\n')
 }
 
 if (project.hasProperty('bintrayUser')) {
@@ -60,12 +71,29 @@ if (project.hasProperty('bintrayUser')) {
                         root.children().last() + pomConfig
                         def dependenciesNode = root.appendNode('dependencies')
                         configurations.implementation.allDependencies.each {
-                            if (it.name != 'unspecified') {
+                            if (it.name != 'unspecified' && !it.hasProperty('dependencyProject')) {
                                 def dependencyNode = dependenciesNode.appendNode('dependency')
                                 dependencyNode.appendNode('groupId', it.group)
                                 dependencyNode.appendNode('artifactId', it.name)
                                 dependencyNode.appendNode('version', it.version)
+                                if (it.hasProperty('optional') && it.optional) {
+                                    dependencyNode.appendNode('optional', 'true')
+                                }
                             }
+                        }
+
+                        if (project.hasProperty("extraDependencies")) {
+                            println "Processing extraDependencies for project ${project.name}...."
+                            if (project.extraDependencies instanceof List) {
+                                project.extraDependencies.each { dep ->
+                                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                                    dependencyNode.appendNode('groupId', dep.group)
+                                    dependencyNode.appendNode('artifactId', dep.name)
+                                    dependencyNode.appendNode('version', dep.version)
+                                }
+                            }
+                        } else {
+                            println "There is no extraDependencies property!!!"
                         }
                     }
                 }
@@ -77,7 +105,8 @@ if (project.hasProperty('bintrayUser')) {
         user = project.property('bintrayUser')
         key = project.property('bintrayKey')
         publications = [pubName]
-        dryRun = true
+        dryRun = false
+        override = false
         pkg {
             repo = BINTRAY_REPO
             name = libraryArtifactId
