@@ -84,37 +84,47 @@ def printObj = { o ->
             .join('\n')
 }
 
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
 
 if (project.hasProperty('bintrayUser')) {
 
     apply plugin: "com.jfrog.bintray"
     apply plugin: 'maven-publish'
 
-    task javadoc(type: Javadoc) {
-        source = android.sourceSets.main.java.srcDirs
-        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    }
 
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        from javadoc.destinationDir
-    }
+    def pubNames = []
+    android.libraryVariants.all { variant ->
+        if (variant.buildType.name == "debug")
+            return
 
-    afterEvaluate {
+        if (!pubNames.isEmpty()) {
+            println "Already items in list, we don't want to mess..."
+            return
+        }
+
         publishing {
             publications {
-                LibraryPublication(MavenPublication) {
+                CommonLibraryPublication(MavenPublication) {
                     groupId = 'com.inqbarna.util'
                     artifactId = 'common'
                     version = '1.0.0'
                     artifact androidSourcesJar
                     artifact javadocJar
-                    printObj assembleRelease
+                    artifact variant.packageLibrary
+
                     pom {
                         packaging "aar"
                         withXml {
                             def root = asNode()
-                            root.children().last + pomConfig
+                            root.children().last() + pomConfig
                             def dependenciesNode = root.appendNode('dependencies')
                             configurations.implementation.allDependencies.each {
                                 if (it.name != 'unspecified') {
@@ -129,23 +139,27 @@ if (project.hasProperty('bintrayUser')) {
                 }
             }
         }
+        pubNames.add("CommonLibraryPublication")
     }
 
-
-    bintray {
-        user = project.property('bintrayUser')
-        key = project.property('bintrayKey')
-        publications = ['LibraryPublication']
-        dryRun = true
-        pkg {
-            repo = 'utilities'
-            name = 'common'
-            userOrg = 'inqbarna-oss'
-            licenses = ['Apache-2.0']
-            vcsUrl = 'http://gitlab.inqbarna.com/contrib/android-loaders.git'
-            version {
-                name = "1.0.0"
+    afterEvaluate {
+        if (!pubNames.isEmpty()) {
+            bintray {
+                user = project.property('bintrayUser')
+                key = project.property('bintrayKey')
+                publications = pubNames
+                pkg {
+                    repo = 'utilities'
+                    name = 'common'
+                    userOrg = 'inqbarna-oss'
+                    licenses = ['Apache-2.0']
+                    vcsUrl = 'http://gitlab.inqbarna.com/contrib/android-loaders.git'
+                    version {
+                        name = "1.0.0"
+                    }
+                }
             }
         }
     }
+
 }
