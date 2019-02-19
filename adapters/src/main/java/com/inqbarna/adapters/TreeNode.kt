@@ -15,7 +15,7 @@ interface TreeNode<T : Any> {
 
     fun close(notify: Boolean): Boolean
 
-    fun closeChilds(notify: Boolean): Boolean
+    fun closeChildren(notify: Boolean): Boolean
 
     fun isChild(other: TreeNode<T>, findClosed: Boolean): Boolean
 

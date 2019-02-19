@@ -1,8 +1,8 @@
 package com.inqbarna.adapters
 
-import android.view.View
 import com.google.common.collect.ImmutableList
-import com.google.common.collect.TreeTraverser
+import com.google.common.graph.SuccessorsFunction
+import com.google.common.graph.Traverser
 import java.util.*
 
 /**
@@ -10,12 +10,13 @@ import java.util.*
  * @version 1.0 31/1/17
  */
 
-open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker>(
-        private val factory: TreeItemVMFactory<T, VMType>
+open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker> @JvmOverloads constructor(
+        private var factory: TreeItemVMFactory<T, VMType>? = null
 ) : BindingAdapter() {
 
     private val flattened = mutableListOf<TreeNodeImpl<T, VMType>>()
-    private val tree = mutableListOf<TreeNodeImpl<T, VMType>>()
+    private val tree  = mutableListOf<TreeNodeImpl<T, VMType>>()
+    private val ROOT = TreeNodeImpl.createInvalid<T>()
 
     protected val toplevelItemsData: List<T>
         get() = tree.map { it.data }
@@ -33,6 +34,12 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker>(
         flattened.clear()
         tree.clear()
         addItems(items, false)
+        notifyDataSetChanged()
+    }
+
+    fun setItemFactory(factory: TreeItemVMFactory<T, VMType>) {
+        this.factory = factory
+        preOrder().onEach { (it as TreeNodeImpl<T, VMType>).updateFactory(factory) }
         notifyDataSetChanged()
     }
 
@@ -88,40 +95,34 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker>(
     }
 
     protected fun preOrder(): Iterable<TreeNode<*>> {
-        val ROOT = TreeNodeImpl.createInvalid<T>()
-        return Traverser(ROOT)
-                .preOrderTraversal(ROOT)
-                .filter { input -> input !== ROOT }
+        return Traverser.forTree(ChildrenFunction()).depthFirstPreOrder(ROOT).filter { it !== ROOT }
     }
 
     protected fun breadthFirstIterator(node: TreeNode<*>?): Iterable<TreeExtractedData<T, VMType>> {
-        val ROOT = TreeNodeImpl.createInvalid<T>()
         val root: TreeNodeImpl<*, *> = when (node) {
             !is TreeNodeImpl<*, *> -> return ImmutableList.of()
             null -> ROOT
             else -> node
         }
 
-        return Traverser(ROOT)
-                .breadthFirstTraversal(root)
-                .filter { itm -> itm !== ROOT }
-                .transform { itm ->
-                    TreeExtractedData(itm as TreeNode<T>, itm.data, itm.viewModel as VMType)
-                }
+        return Traverser.forTree(ChildrenFunction()).breadthFirst(root)
+                .filter { it !== ROOT }
+                .map { TreeExtractedData(it as TreeNode<T>, it.data, it.viewModel as VMType) }
     }
 
-    private inner class Traverser(private val ROOT: TreeNodeImpl<*, *>) : TreeTraverser<TreeNodeImpl<*, *>>() {
-        override fun children(root: TreeNodeImpl<*, *>): Iterable<TreeNodeImpl<*, *>> {
-            return if (root === ROOT) {
+    private inner class ChildrenFunction : SuccessorsFunction<TreeNodeImpl<*, *>> {
+
+        override fun successors(node: TreeNodeImpl<*, *>): Iterable<TreeNodeImpl<*, *>> {
+            return if (node === ROOT) {
                 tree
             } else {
-                root.childNodes
+                node.childNodes
             }
         }
     }
 
     private class TreeNodeImpl<T : Nestable<T>, VMType : TypeMarker> : TreeNode<T> {
-        private val factory: TreeItemVMFactory<T, VMType>?
+        private var factory: TreeItemVMFactory<T, VMType>?
         internal val hasChildren: Boolean
         override var parent: TreeNode<T>?
             private set
@@ -154,12 +155,17 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker>(
             factory = null
         }
 
+        internal fun updateFactory(factory: TreeItemVMFactory<T, VMType>) {
+            this.factory = factory
+            _viewModel = null
+        }
+
         override val data: T
             get() = requireNotNull(_data) { "This is an invalid node, do not get data from it (check before)" }
 
         internal val viewModel: VMType
             get() {
-                val factory = requireNotNull(factory) { "This is an invalid node, do not get data from it (check before)" }
+                val factory = requireNotNull(factory) { "This is an invalid node, do not get factory from it (check before)" }
                 return _viewModel ?: factory.createViewModel(data).also { _viewModel = it }
             }
 
@@ -285,7 +291,7 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker>(
             } else false
         }
 
-        override fun closeChilds(notify: Boolean): Boolean {
+        override fun closeChildren(notify: Boolean): Boolean {
             var retVal = false
             for (n in childNodes) {
                 retVal = retVal or n.close(notify)
@@ -402,9 +408,3 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker>(
 }
 
 data class TreeExtractedData<T : Any, VM : TypeMarker>(val node: TreeNode<*>, val data: T, val viewModel: VM)
-
-private object InvalidTypeMarker : TypeMarker {
-    override fun getItemType(): Int {
-        return View.NO_ID
-    }
-}
