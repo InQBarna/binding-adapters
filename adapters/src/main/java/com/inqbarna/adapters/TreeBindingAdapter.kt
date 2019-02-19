@@ -1,6 +1,6 @@
 package com.inqbarna.adapters
 
-import com.google.common.base.Function
+import android.view.View
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.TreeTraverser
 import java.util.*
@@ -10,16 +10,18 @@ import java.util.*
  * @version 1.0 31/1/17
  */
 
-open class TreeBindingAdapter<T : NestableMarker<T>> : BindingAdapter() {
+open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker>(
+        private val factory: TreeItemVMFactory<T, VMType>
+) : BindingAdapter() {
 
-    private val flattened = mutableListOf<TreeNodeImpl<T>>()
-    private val tree = mutableListOf<TreeNodeImpl<T>>()
+    private val flattened = mutableListOf<TreeNodeImpl<T, VMType>>()
+    private val tree = mutableListOf<TreeNodeImpl<T, VMType>>()
 
     protected val toplevelItemsData: List<T>
-        get() = TODO()
+        get() = tree.map { it.data }
 
     protected val flattenedItemsData: List<T>
-        get() = TODO()
+        get() = flattened.map { it.data }
 
     protected val toplevelItems: List<TreeNode<T>>
         get() = tree.toList()
@@ -27,7 +29,7 @@ open class TreeBindingAdapter<T : NestableMarker<T>> : BindingAdapter() {
     protected val flattenedItems: List<TreeNode<T>>
         get() = flattened.toList()
 
-    open fun setItems(items: List<T>) {
+    fun setItems(items: List<T>) {
         flattened.clear()
         tree.clear()
         addItems(items, false)
@@ -48,8 +50,8 @@ open class TreeBindingAdapter<T : NestableMarker<T>> : BindingAdapter() {
         }
     }
 
-    override fun getDataAt(position: Int): TypeMarker? {
-        return flattened[position].data
+    override fun getDataAt(position: Int): TypeMarker {
+        return flattened[position].viewModel
     }
 
     override fun getItemCount(): Int {
@@ -85,46 +87,31 @@ open class TreeBindingAdapter<T : NestableMarker<T>> : BindingAdapter() {
         }
     }
 
-    protected fun preOrder(): Iterable<TreeNode<T>> {
+    protected fun preOrder(): Iterable<TreeNode<*>> {
         val ROOT = TreeNodeImpl.createInvalid<T>()
         return Traverser(ROOT)
                 .preOrderTraversal(ROOT)
                 .filter { input -> input !== ROOT }
     }
 
-    protected fun depthIterationOverChilds(node: TreeNode<T>): Iterable<T> {
-        if (node !is TreeNodeImpl<*>) {
-            return ImmutableList.of()
-        }
-
-        val root = node as TreeNodeImpl<T>
-        return Traverser(root)
-                .preOrderTraversal(root)
-                .transform { input -> input?.data }
-    }
-
-    protected fun applyInDepth(node: TreeNode<T>, apply: Function<T, Void>) {
-        for (`in` in depthIterationOverChilds(node)) {
-            apply.apply(`in`)
-        }
-    }
-
-    protected fun breadthFirstIterator(node: TreeNode<T>?): Iterable<TreeNode<T>> {
+    protected fun breadthFirstIterator(node: TreeNode<*>?): Iterable<TreeExtractedData<T, VMType>> {
         val ROOT = TreeNodeImpl.createInvalid<T>()
-        val root: TreeNodeImpl<T> = when (node) {
-            !is TreeNodeImpl<*> -> return ImmutableList.of()
+        val root: TreeNodeImpl<*, *> = when (node) {
+            !is TreeNodeImpl<*, *> -> return ImmutableList.of()
             null -> ROOT
-            else -> node as TreeNodeImpl<T>
+            else -> node
         }
 
         return Traverser(ROOT)
                 .breadthFirstTraversal(root)
                 .filter { itm -> itm !== ROOT }
-                .transform { itm -> itm as TreeNode<T> }
+                .transform { itm ->
+                    TreeExtractedData(itm as TreeNode<T>, itm.data, itm.viewModel as VMType)
+                }
     }
 
-    private inner class Traverser(private val ROOT: TreeNodeImpl<T>) : TreeTraverser<TreeNodeImpl<T>>() {
-        override fun children(root: TreeNodeImpl<T>): Iterable<TreeNodeImpl<T>> {
+    private inner class Traverser(private val ROOT: TreeNodeImpl<*, *>) : TreeTraverser<TreeNodeImpl<*, *>>() {
+        override fun children(root: TreeNodeImpl<*, *>): Iterable<TreeNodeImpl<*, *>> {
             return if (root === ROOT) {
                 tree
             } else {
@@ -133,7 +120,8 @@ open class TreeBindingAdapter<T : NestableMarker<T>> : BindingAdapter() {
         }
     }
 
-    private class TreeNodeImpl<T : NestableMarker<T>> : TreeNode<T> {
+    private class TreeNodeImpl<T : Nestable<T>, VMType : TypeMarker> : TreeNode<T> {
+        private val factory: TreeItemVMFactory<T, VMType>?
         internal val hasChildren: Boolean
         override var parent: TreeNode<T>?
             private set
@@ -141,9 +129,10 @@ open class TreeBindingAdapter<T : NestableMarker<T>> : BindingAdapter() {
             private set
         internal val numChildren: Int
         private val _data: T?
-        internal val childNodes: List<TreeNodeImpl<T>>
+        internal val childNodes: List<TreeNodeImpl<T, VMType>>
 
-        private val adapter: TreeBindingAdapter<T>?
+        private val adapter: TreeBindingAdapter<T, VMType>?
+        private var _viewModel: VMType? = null
 
         override fun toString(): String {
             val sb = StringBuilder("TreeNode{")
@@ -162,22 +151,30 @@ open class TreeBindingAdapter<T : NestableMarker<T>> : BindingAdapter() {
             parent = null
             hasChildren = false
             childNodes = emptyList()
+            factory = null
         }
 
         override val data: T
             get() = requireNotNull(_data) { "This is an invalid node, do not get data from it (check before)" }
 
+        internal val viewModel: VMType
+            get() {
+                val factory = requireNotNull(factory) { "This is an invalid node, do not get data from it (check before)" }
+                return _viewModel ?: factory.createViewModel(data).also { _viewModel = it }
+            }
+
         @JvmOverloads
-        constructor(adapter: TreeBindingAdapter<T>, marker: T, parent: TreeNode<T>? = null) {
+        constructor(adapter: TreeBindingAdapter<T, VMType>, item: T, parent: TreeNode<T>? = null) {
             this.parent = parent
             this.adapter = adapter
             // closed state by default
-            val children = marker.children()
+            val children = item.children
             numChildren = children.size
             childNodes = children.map { TreeNodeImpl(adapter, it, this) }
-            _data = marker
+            _data = item
             hasChildren = numChildren > 0
             isOpened = false
+            factory = adapter.factory
         }
 
         internal fun open(yourIdxInFlat: Int, notify: Boolean): Boolean {
@@ -314,22 +311,22 @@ open class TreeBindingAdapter<T : NestableMarker<T>> : BindingAdapter() {
             if (this === other) return true
             if (other == null || javaClass != other.javaClass) return false
 
-            val treeNode = other as TreeNodeImpl<*>
+            val treeNode = other as TreeNodeImpl<*, *>
 
             if (isOpened != treeNode.isOpened) return false
-            return if (numChildren != treeNode.numChildren) false else data.key == treeNode.data.getKey()
+            return if (numChildren != treeNode.numChildren) false else data.identityKey == treeNode.data.identityKey
 
         }
 
         override fun hashCode(): Int {
             var result = if (isOpened) 1 else 0
             result = 31 * result + numChildren
-            result = 31 * result + data.key.hashCode()
+            result = 31 * result + data.identityKey.hashCode()
             return result
         }
 
         companion object {
-            internal fun <T : NestableMarker<T>> createInvalid(): TreeNodeImpl<T> = TreeNodeImpl()
+            internal fun <T : Nestable<T>> createInvalid(): TreeNodeImpl<T, *> = TreeNodeImpl<T, TypeMarker>()
         }
     }
 
@@ -389,7 +386,7 @@ open class TreeBindingAdapter<T : NestableMarker<T>> : BindingAdapter() {
     companion object {
 
         @Suppress("UNCHECKED_CAST")
-        private fun <T : NestableMarker<T>> itemEqual(aValue: T, bValue: T): Boolean {
+        private fun <T : Nestable<T>> itemEqual(aValue: T, bValue: T): Boolean {
             if (aValue === bValue) {
                 return true
             }
@@ -402,4 +399,12 @@ open class TreeBindingAdapter<T : NestableMarker<T>> : BindingAdapter() {
         }
     }
 
+}
+
+data class TreeExtractedData<T : Any, VM : TypeMarker>(val node: TreeNode<*>, val data: T, val viewModel: VM)
+
+private object InvalidTypeMarker : TypeMarker {
+    override fun getItemType(): Int {
+        return View.NO_ID
+    }
 }

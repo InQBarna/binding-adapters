@@ -31,7 +31,7 @@ android {
 dependencies {
 	api project(':common')
     api project(':rxutil-rxjava2')
-    api (group: 'com.google.guava', name: 'guava', version: '25.1-android')
+    api (group: 'com.google.guava', name: 'guava', version: '27.0.1-android')
     api group: 'com.google.code.findbugs', name: 'jsr305', version: '2.0.1'
     api group: 'io.reactivex.rxjava2', name: 'rxjava', version: rxJava2Version
 

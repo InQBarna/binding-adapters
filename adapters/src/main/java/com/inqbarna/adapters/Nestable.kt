@@ -6,4 +6,5 @@ package com.inqbarna.adapters
  */
 interface Nestable<out T : Nestable<T>> {
     val children: List<T>
+    val identityKey: Any
 }

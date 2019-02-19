@@ -1,10 +1,10 @@
 package com.inqbarna.adapters
 
 /**
- * Created by David García <david.garcia></david.garcia>@inqbarna.com> on 3/02/17.
+ * Created by David García (david.garcia@inqbarna.com)
  */
 
-interface TreeNode<T : NestableMarker<T>> {
+interface TreeNode<T : Any> {
     val parent: TreeNode<T>?
 
     val isOpened: Boolean
