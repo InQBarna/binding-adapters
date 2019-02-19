@@ -10,7 +10,8 @@ import java.util.*
  * @version 1.0 31/1/17
  */
 
-open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker> @JvmOverloads constructor(
+open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constructor(
+        private val dataExtractor: DataExtractor<T>,
         private var factory: TreeItemVMFactory<T, VMType>? = null
 ) : BindingAdapter() {
 
@@ -121,7 +122,7 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker> @JvmOverload
         }
     }
 
-    private class TreeNodeImpl<T : Nestable<T>, VMType : TypeMarker> : TreeNode<T> {
+    private class TreeNodeImpl<T : Any, VMType : TypeMarker> : TreeNode<T> {
         private var factory: TreeItemVMFactory<T, VMType>?
         internal val hasChildren: Boolean
         override var parent: TreeNode<T>?
@@ -134,6 +135,11 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker> @JvmOverload
 
         private val adapter: TreeBindingAdapter<T, VMType>?
         private var _viewModel: VMType? = null
+
+        private var _dataExtractor: DataExtractor<T>? = null
+
+        private val dataExtractor: DataExtractor<T>
+            get() = requireNotNull(_dataExtractor) { "Illegal operation on an invalid node" }
 
         override fun toString(): String {
             val sb = StringBuilder("TreeNode{")
@@ -153,6 +159,7 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker> @JvmOverload
             hasChildren = false
             childNodes = emptyList()
             factory = null
+            _dataExtractor = null
         }
 
         internal fun updateFactory(factory: TreeItemVMFactory<T, VMType>) {
@@ -174,13 +181,15 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker> @JvmOverload
             this.parent = parent
             this.adapter = adapter
             // closed state by default
-            val children = item.children
+            _dataExtractor = adapter.dataExtractor
+            factory = adapter.factory
+
+            val children = with (dataExtractor) { item.children }
             numChildren = children.size
             childNodes = children.map { TreeNodeImpl(adapter, it, this) }
             _data = item
             hasChildren = numChildren > 0
             isOpened = false
-            factory = adapter.factory
         }
 
         internal fun open(yourIdxInFlat: Int, notify: Boolean): Boolean {
@@ -315,24 +324,28 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker> @JvmOverload
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
-            if (other == null || javaClass != other.javaClass) return false
+            if (other == null || other !is TreeNodeImpl<*, *>) return false
 
-            val treeNode = other as TreeNodeImpl<*, *>
+            val treeNode = other as TreeNodeImpl<T, VMType>
 
             if (isOpened != treeNode.isOpened) return false
-            return if (numChildren != treeNode.numChildren) false else data.identityKey == treeNode.data.identityKey
+            val (myKey, otherKey) = with (dataExtractor) {
+                arrayOf(data.identityKey, treeNode.data.identityKey)
+            }
+            return if (numChildren != treeNode.numChildren) false else myKey == otherKey
 
         }
 
         override fun hashCode(): Int {
+            val itemKey = with (dataExtractor) { data.identityKey }
             var result = if (isOpened) 1 else 0
             result = 31 * result + numChildren
-            result = 31 * result + data.identityKey.hashCode()
+            result = 31 * result + itemKey.hashCode()
             return result
         }
 
         companion object {
-            internal fun <T : Nestable<T>> createInvalid(): TreeNodeImpl<T, *> = TreeNodeImpl<T, TypeMarker>()
+            internal fun <T : Any> createInvalid(): TreeNodeImpl<T, *> = TreeNodeImpl<T, TypeMarker>()
         }
     }
 
@@ -392,7 +405,7 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker> @JvmOverload
     companion object {
 
         @Suppress("UNCHECKED_CAST")
-        private fun <T : Nestable<T>> itemEqual(aValue: T, bValue: T): Boolean {
+        private fun <T : Any> itemEqual(aValue: T, bValue: T): Boolean {
             if (aValue === bValue) {
                 return true
             }
@@ -405,6 +418,12 @@ open class TreeBindingAdapter<T : Nestable<T>, VMType : TypeMarker> @JvmOverload
         }
     }
 
+}
+
+
+interface DataExtractor<T : Any> {
+    val T.identityKey: Any
+    val T.children: List<T>
 }
 
 data class TreeExtractedData<T : Any, VM : TypeMarker>(val node: TreeNode<*>, val data: T, val viewModel: VM)
