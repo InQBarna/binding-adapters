@@ -46,6 +46,7 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
 
     @JvmOverloads
     fun addItems(items: List<T>, notify: Boolean = true) {
+        ensureFactory()
         val firstIdx = flattened.size
         for (item in items) {
             val node = TreeNodeImpl(this, item) // create node, by default closed...
@@ -56,6 +57,10 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
         if (notify) {
             notifyItemRangeInserted(firstIdx, items.size)
         }
+    }
+
+    private fun ensureFactory() {
+        requireNotNull(factory) { "You need to provide with TreeItemVMFactory before you try this operation" }
     }
 
     override fun getDataAt(position: Int): TypeMarker {
