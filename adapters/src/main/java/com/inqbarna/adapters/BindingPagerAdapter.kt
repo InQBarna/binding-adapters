@@ -1,5 +1,6 @@
 package com.inqbarna.adapters
 
+import android.arch.lifecycle.LifecycleOwner
 import android.databinding.DataBindingUtil
 import android.databinding.ViewDataBinding
 import android.support.v4.view.PagerAdapter
@@ -67,6 +68,10 @@ abstract class BindingPagerAdapter<T : TypeMarker>() : PagerAdapter() {
         helper.bindingComponent = bindingComponent
     }
 
+    protected fun setLifecycleOwner(lifecycleOwner: LifecycleOwner) {
+        helper.lifecycleOwner = lifecycleOwner
+    }
+
     final override fun getItemPosition(`object` : Any) : Int {
         val viewDataBinding = `object` as? ViewDataBinding
         return getPositionOf(viewDataBinding.recoverData())
@@ -111,12 +116,16 @@ abstract class BindingPagerAdapter<T : TypeMarker>() : PagerAdapter() {
 
 internal class PagerAdapterHelper(var bindingComponent : android.databinding.DataBindingComponent? = null) {
     internal lateinit var binder : ItemBinder
+    internal var lifecycleOwner: LifecycleOwner? = null
     fun isViewFromObject(view : View, any : Any) : Boolean = if (any is ViewDataBinding) any == DataBindingUtil.getBinding(view) else false
 
     fun instantiateItem(container : ViewGroup, position : Int, dataAt : TypeMarker) : ViewDataBinding {
         val viewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(LayoutInflater.from(container.context), dataAt.itemType, container, true, bindingComponent)
         with(BindingPagerAdapter) {
             viewDataBinding.storeData(dataAt)
+        }
+        lifecycleOwner?.let {
+            viewDataBinding.setLifecycleOwner(it)
         }
         binder.bindVariables(VariableBinding { variable, value -> viewDataBinding.setVariable(variable, value) }, position, dataAt)
         viewDataBinding.executePendingBindings()
@@ -131,6 +140,7 @@ internal class PagerAdapterHelper(var bindingComponent : android.databinding.Dat
             val binding = DataBindingUtil.getBinding<ViewDataBinding>(childAt)
             if (binding === any) {
                 container.removeView(childAt)
+                binding.setLifecycleOwner(null)
                 return binding
             }
             i++
