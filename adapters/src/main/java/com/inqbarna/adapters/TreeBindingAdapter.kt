@@ -63,7 +63,7 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
         requireNotNull(factory) { "You need to provide with TreeItemVMFactory before you try this operation" }
     }
 
-    override fun getDataAt(position: Int): TypeMarker {
+    final override fun getDataAt(position: Int): VMType {
         return flattened[position].viewModel
     }
 
@@ -104,10 +104,10 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
         return Traverser.forTree(ChildrenFunction()).depthFirstPreOrder(ROOT).filter { it !== ROOT }
     }
 
-    protected fun breadthFirstExtractorIterator(node: TreeNode<*>?): Iterable<TreeExtractedData<T, VMType>> {
+    protected fun breadthFirstExtractorIterator(node: TreeNode<*>? = null): Iterable<TreeExtractedData<T, VMType>> {
         return breadthFirstNodeIterator(node)
                 .map { it as TreeNodeImpl<T, VMType> }
-                .map { TreeExtractedData(it as TreeNode<T>, it.data, it.viewModel) }
+                .map { TreeExtractedData(it as TreeNode<T>, it.data, it.tryGetViewModel()) }
     }
 
     protected fun breadthFirstNodeIterator(node: TreeNode<*>?): Iterable<TreeNode<T>> {
@@ -126,10 +126,10 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
         return breadthFirstNodeIterator(null).firstOrNull { itemEqual(item, it.data)}
     }
 
-    protected fun extractDataAtPos(visiblePos: Int): TreeExtractedData<T, VMType>? {
+    protected fun extractDataAtPos(visiblePos: Int, noCreate: Boolean = false): TreeExtractedData<T, VMType>? {
         if (visiblePos >= 0 && visiblePos < flattened.size) {
             val node = flattened[visiblePos]
-            return TreeExtractedData(node, node.data, node.viewModel)
+            return TreeExtractedData(node, node.data, if (noCreate) node.tryGetViewModel() else node.viewModel)
         }
         return null
     }
@@ -198,6 +198,8 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
                 val factory = requireNotNull(factory) { "This is an invalid node, do not get factory from it (check before)" }
                 return _viewModel ?: factory.createViewModel(data).also { _viewModel = it }
             }
+
+        internal fun tryGetViewModel(): VMType? = _viewModel
 
         @JvmOverloads
         constructor(adapter: TreeBindingAdapter<T, VMType>, item: T, parent: TreeNode<T>? = null) {
@@ -449,4 +451,4 @@ interface DataExtractor<T : Any> {
     val T.children: List<T>
 }
 
-data class TreeExtractedData<T : Any, VM : TypeMarker>(val node: TreeNode<*>, val data: T, val viewModel: VM)
+data class TreeExtractedData<T : Any, VM : TypeMarker>(val node: TreeNode<*>, val data: T, val viewModel: VM?)
