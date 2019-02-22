@@ -11,11 +11,13 @@ interface TreeNode<T : Any> {
 
     val data: T
 
-    fun open(notify: Boolean): Boolean
+    val hasChildren: Boolean
 
-    fun close(notify: Boolean): Boolean
+    fun open(notify: Boolean = true): Boolean
 
-    fun closeChildren(notify: Boolean): Boolean
+    fun close(notify: Boolean = true): Boolean
+
+    fun closeChildren(notify: Boolean = true): Boolean
 
     fun isChild(other: TreeNode<T>, findClosed: Boolean): Boolean
 

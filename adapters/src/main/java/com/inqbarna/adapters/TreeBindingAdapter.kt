@@ -104,16 +104,34 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
         return Traverser.forTree(ChildrenFunction()).depthFirstPreOrder(ROOT).filter { it !== ROOT }
     }
 
-    protected fun breadthFirstIterator(node: TreeNode<*>?): Iterable<TreeExtractedData<T, VMType>> {
+    protected fun breadthFirstExtractorIterator(node: TreeNode<*>?): Iterable<TreeExtractedData<T, VMType>> {
+        return breadthFirstNodeIterator(node)
+                .map { it as TreeNodeImpl<T, VMType> }
+                .map { TreeExtractedData(it as TreeNode<T>, it.data, it.viewModel) }
+    }
+
+    protected fun breadthFirstNodeIterator(node: TreeNode<*>?): Iterable<TreeNode<T>> {
         val root: TreeNodeImpl<*, *> = when (node) {
-            !is TreeNodeImpl<*, *> -> return ImmutableList.of()
             null -> ROOT
+            !is TreeNodeImpl<*, *> -> return ImmutableList.of()
             else -> node
         }
 
         return Traverser.forTree(ChildrenFunction()).breadthFirst(root)
                 .filter { it !== ROOT }
-                .map { TreeExtractedData(it as TreeNode<T>, it.data, it.viewModel as VMType) }
+                .map { it as TreeNode<T> }
+    }
+
+    protected fun findNodeForItem(item: T): TreeNode<T>? {
+        return breadthFirstNodeIterator(null).firstOrNull { itemEqual(item, it.data)}
+    }
+
+    protected fun extractDataAtPos(visiblePos: Int): TreeExtractedData<T, VMType>? {
+        if (visiblePos >= 0 && visiblePos < flattened.size) {
+            val node = flattened[visiblePos]
+            return TreeExtractedData(node, node.data, node.viewModel)
+        }
+        return null
     }
 
     private inner class ChildrenFunction : SuccessorsFunction<TreeNodeImpl<*, *>> {
@@ -129,7 +147,7 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
 
     private class TreeNodeImpl<T : Any, VMType : TypeMarker> : TreeNode<T> {
         private var factory: TreeItemVMFactory<T, VMType>?
-        internal val hasChildren: Boolean
+        override val hasChildren: Boolean
         override var parent: TreeNode<T>?
             private set
         override var isOpened: Boolean = false
