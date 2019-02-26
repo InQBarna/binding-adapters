@@ -43,9 +43,9 @@ def grp = LIBRARY_GROUP_ID
 
 ext {
     libraryArtifactId = "rxutil-api"
-    libraryVersion = '1.0.0'
+    libraryVersion = '1.0.1'
     extraDependencies = [
-            [group: grp, name: "common", version: "1.0.0"]
+            [group: grp, name: "common", version: "1.0.1"]
     ]
 }
 
