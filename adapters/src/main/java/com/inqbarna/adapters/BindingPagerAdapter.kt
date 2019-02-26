@@ -1,18 +1,18 @@
-/* 
- * Copyright 2014 InQBarna Kenkyuu Jo SL 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0 
- * 
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
- * limitations under the License. 
- */ 
+/*
+ * Copyright 2014 InQBarna Kenkyuu Jo SL
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.inqbarna.adapters
 
@@ -22,6 +22,7 @@ import androidx.viewpager.widget.PagerAdapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LifecycleOwner
 import kotlin.properties.Delegates
 
 /**
@@ -83,6 +84,10 @@ abstract class BindingPagerAdapter<T : TypeMarker>() : PagerAdapter() {
         helper.bindingComponent = bindingComponent
     }
 
+    protected fun setLifecycleOwner(lifecycleOwner: LifecycleOwner) {
+        helper.lifecycleOwner = lifecycleOwner
+    }
+
     final override fun getItemPosition(`object` : Any) : Int {
         val viewDataBinding = `object` as? ViewDataBinding
         return getPositionOf(viewDataBinding.recoverData())
@@ -127,12 +132,16 @@ abstract class BindingPagerAdapter<T : TypeMarker>() : PagerAdapter() {
 
 internal class PagerAdapterHelper(var bindingComponent : androidx.databinding.DataBindingComponent? = null) {
     internal lateinit var binder : ItemBinder
+    internal var lifecycleOwner: LifecycleOwner? = null
     fun isViewFromObject(view : View, any : Any) : Boolean = if (any is ViewDataBinding) any == DataBindingUtil.getBinding(view) else false
 
     fun instantiateItem(container : ViewGroup, position : Int, dataAt : TypeMarker) : ViewDataBinding {
         val viewDataBinding = DataBindingUtil.inflate<ViewDataBinding>(LayoutInflater.from(container.context), dataAt.itemType, container, true, bindingComponent)
         with(BindingPagerAdapter) {
             viewDataBinding.storeData(dataAt)
+        }
+        lifecycleOwner?.let {
+            viewDataBinding.setLifecycleOwner(it)
         }
         binder.bindVariables(VariableBinding { variable, value -> viewDataBinding.setVariable(variable, value) }, position, dataAt)
         viewDataBinding.executePendingBindings()
@@ -147,6 +156,7 @@ internal class PagerAdapterHelper(var bindingComponent : androidx.databinding.Da
             val binding = DataBindingUtil.getBinding<ViewDataBinding>(childAt)
             if (binding === any) {
                 container.removeView(childAt)
+                binding.setLifecycleOwner(null)
                 return binding
             }
             i++
