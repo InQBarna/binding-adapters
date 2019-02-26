@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jetbrains.dokka-android'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -37,3 +38,15 @@ dependencies {
     })
     testImplementation testLibraries.junit
 }
+
+def grp = LIBRARY_GROUP_ID
+
+ext {
+    libraryArtifactId = "rxutil-api"
+    libraryVersion = '1.0.0'
+    extraDependencies = [
+            [group: grp, name: "common", version: "1.0.0"]
+    ]
+}
+
+apply from: "${rootProject.projectDir}/gradle/publish_lib.gradle"

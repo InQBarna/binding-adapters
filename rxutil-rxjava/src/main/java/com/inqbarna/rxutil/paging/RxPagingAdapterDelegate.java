@@ -38,7 +38,7 @@ import rx.functions.Func3;
 import rx.observables.AsyncOnSubscribe;
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 16/9/16
  */
 

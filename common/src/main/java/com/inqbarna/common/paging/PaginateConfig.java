@@ -17,7 +17,7 @@
 package com.inqbarna.common.paging;
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 19/9/16
  */
 public class PaginateConfig {

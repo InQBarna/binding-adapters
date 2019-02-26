@@ -36,7 +36,7 @@ import timber.log.Timber
 import java.util.concurrent.ExecutorService
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 23/02/2018
  */
 @RunWith(RobolectricTestRunner::class)

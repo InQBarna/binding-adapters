@@ -34,7 +34,7 @@ import rx.Observable;
 import rx.Subscriber;
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 16/9/16
  */
 

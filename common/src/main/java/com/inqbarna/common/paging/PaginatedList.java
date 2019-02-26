@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 16/9/16
  */
 public interface PaginatedList<U> {

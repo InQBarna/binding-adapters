@@ -23,7 +23,7 @@ import java.util.AbstractList;
 import java.util.List;
 
 /**
- * @author David García <david.garcia@inqbarna.com>
+ * @author David García (david.garcia@inqbarna.com)
  * @version 1.0 29/9/16
  */
 public class AdapterSyncList<T> extends AbstractList<T> {

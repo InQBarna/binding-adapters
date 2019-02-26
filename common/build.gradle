@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.dokka-android'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -34,3 +35,10 @@ dependencies {
     })
     testImplementation testLibraries.junit
 }
+
+ext {
+    libraryArtifactId = "common"
+    libraryVersion = '1.0.0'
+}
+
+apply from: "${rootProject.projectDir}/gradle/publish_lib.gradle"
