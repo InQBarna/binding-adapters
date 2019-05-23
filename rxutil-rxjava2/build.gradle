@@ -31,7 +31,9 @@ android {
 dependencies {
     api project(':common')
     api project(':rxutil')
-    compileOnly libraries.jake.timber
+    compileOnly (libraries.jake.timber) {
+        exclude group: "org.jetbrains", module: "annotations"
+    }
     implementation libraries.rxJava2.base
     implementation libraries.rxJava2.android
     implementation libraries.kotlin.jdk8
@@ -45,7 +47,7 @@ def grp = LIBRARY_GROUP_ID
 
 ext {
     libraryArtifactId = "rxutil-rxjava2"
-    libraryVersion = '1.0.1'
+    libraryVersion = '1.0.2'
     extraDependencies = [
             [group: grp, name: "common", version: "1.0.1"],
             [group: grp, name: "rxutil-api", version: "1.0.1"]

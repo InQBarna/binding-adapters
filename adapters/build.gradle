@@ -35,7 +35,9 @@ dependencies {
     api libraries.guava.base
     api libraries.rxJava2.base
 
-    compileOnly libraries.jake.timber
+    compileOnly (libraries.jake.timber) {
+        exclude group: "org.jetbrains", module: "annotations"
+    }
     implementation libraries.kotlin.jdk8
     implementation libraries.support.v4
     implementation libraries.support.recyclerView
@@ -45,10 +47,10 @@ def grp = LIBRARY_GROUP_ID
 
 ext {
     libraryArtifactId = "adapters"
-    libraryVersion = '1.0.3'
+    libraryVersion = '1.0.4-alpha02'
     extraDependencies = [
             [group: grp, name: "common", version: "1.0.1"],
-            [group: grp, name: "rxutil-rxjava2", version: "1.0.1"]
+            [group: grp, name: "rxutil-rxjava2", version: "1.0.2"]
     ]
 }
 

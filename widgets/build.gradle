@@ -32,5 +32,7 @@ android {
 dependencies {
     implementation libraries.support.design
     implementation libraries.kotlin.jdk8
-    compileOnly libraries.jake.timber
+    compileOnly (libraries.jake.timber) {
+        exclude group: "org.jetbrains", module: "annotations"
+    }
 }
