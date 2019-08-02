@@ -48,9 +48,9 @@ class StickyHeaderWesterosActivity : ListBaseActivity<House>() {
             add(House.Member("Sansa"))
             add(House.Member("Bran"))
             add(House.Member("Arya"))
-            add(House.Member("Ned"))
+            add(House.Member("Eddard"))
 
-            add(House.Name("Lanister"))
+            add(House.Name("Lannister"))
             add(House.Member("Tyrion"))
             add(House.Member("Cersei"))
             add(House.Member("Tywin"))
@@ -63,7 +63,7 @@ class StickyHeaderWesterosActivity : ListBaseActivity<House>() {
             add(House.Member("Aerys"))
 
             add(House.Name("Baratheon"))
-            add(House.Member("Jofrey"))
+            add(House.Member("Joffrey"))
             add(House.Member("Myrcella"))
             add(House.Member("Tommen"))
 

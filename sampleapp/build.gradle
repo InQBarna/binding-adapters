@@ -15,7 +15,6 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
@@ -48,7 +47,6 @@ dependencies {
     implementation libraries.support.appCompat
     implementation libraries.support.recyclerView
     implementation libraries.support.design
-    implementation libraries.support.multidex
     implementation libraries.android.constraintLayout
 
     implementation libraries.jake.timber
