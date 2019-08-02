@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <import type="com.inqbarna.libsamples.House" />
+        <variable
+            name="model"
+            type="com.inqbarna.libsamples.House" />
+    </data>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:text="@{model.label}"
+        android:padding="20dp"
+        tools:text="Header"
+        tools:background="@color/transparency_light_gray"
+        android:textColor="@android:color/black"
+        android:background="@{(model instanceof House.Name) ? @color/light_gray : @android:color/white}"
+        android:textSize="16sp"
+        android:layout_height="wrap_content" />
+</layout>

@@ -17,6 +17,9 @@
 package com.inqbarna.libsamples
 
 import android.app.Application
+import android.content.Context
+import androidx.multidex.MultiDex
+import androidx.multidex.MultiDexApplication
 import timber.log.Timber
 
 /**
@@ -25,7 +28,11 @@ import timber.log.Timber
  * @version 1.0 08/05/2017
  */
 
-class SampleApp : Application() {
+class SampleApp : MultiDexApplication() {
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        MultiDex.install(this)
+    }
     override fun onCreate() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())

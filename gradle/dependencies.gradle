@@ -24,7 +24,8 @@ ext {
             robolectricVersion: "4.1",
             shadowsVersion: "3.7.1",
             espressoCoreVersion: "3.1.0",
-            runnerVersion: "1.1.0"
+            runnerVersion: "1.1.0",
+            multidexVersion: "2.0.1"
     ]
 
     libraries = [
@@ -33,6 +34,7 @@ ext {
                     recyclerView: "androidx.recyclerview:recyclerview:${versions.recyclerviewVersion}",
                     design: "com.google.android.material:material:${versions.materialVersion}",
                     v4: "androidx.legacy:legacy-support-v4:${versions.legacySupportV4Version}",
+                    multidex: "com.android.support:multidex:${versions.multidexVersion}"
             ],
             android: [
                     constraintLayout: "androidx.constraintlayout:constraintlayout:${versions.constraintlayoutVersion}"

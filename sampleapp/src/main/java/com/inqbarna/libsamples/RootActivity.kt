@@ -93,7 +93,8 @@ class OptionsDelegate : ReadOnlyProperty<RootActivity, List<TargetActivity>> {
                 TargetActivity("Paging Adapter", MainActivity.getCallingIntent(thisRef), thisRef),
                 TargetActivity("Numbers Activity", NumbersActivity.getCallingIntent(thisRef), thisRef),
                 TargetActivity("Bottom Bar Progress", TestBottomSheetActivity.getCallingIntent(thisRef), thisRef),
-                TargetActivity("Dynamic Offset Items", OffsetsActivity.getCallingIntent(thisRef), thisRef),
+                TargetActivity("Dynamic Offset Activity", OffsetsActivity.getCallingIntent(thisRef), thisRef),
+                TargetActivity("Sticky Header List", StickyHeaderWesterosActivity.getCallingIntent(thisRef), thisRef),
                 TargetActivity("Test pager", TestPagerAdapter.getCallingIntent(thisRef), thisRef)
         )
     }

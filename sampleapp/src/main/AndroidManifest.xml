@@ -21,6 +21,7 @@
         <activity android:name=".TestBottomSheetActivity"/>
         <activity android:name=".TestPagerAdapter"/>
         <activity android:name=".OffsetsActivity"/>
+        <activity android:name=".StickyHeaderWesterosActivity" />
     </application>
 
 </manifest>
