@@ -11,7 +11,9 @@ android {
 
     defaultConfig {
         applicationId "com.inqbarna.libsamples"
-        minSdkVersion rootProject.ext.minSdkVersion
+        // We use this min sdk on Sample application only (we want to avoid multiDex)
+        // But libraries are set to minSdk 19 (KitKat)
+        minSdkVersion 21
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
