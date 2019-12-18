@@ -38,7 +38,7 @@ dependencies {
 
 ext {
     libraryArtifactId = "common"
-    libraryVersion = '1.0.3'
+    libraryVersion = '1.0.4'
 }
 
 apply from: "${rootProject.projectDir}/gradle/publish_lib.gradle"
