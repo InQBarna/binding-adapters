@@ -39,7 +39,11 @@ import timber.log.Timber;
  * @version 1.0 6/9/16
  */
 public abstract class BindingAdapter extends RecyclerView.Adapter<BindingHolder> {
-    protected static final boolean DEBUG = false;
+    static boolean DEBUG = false;
+    public static void setDebug(boolean enable) {
+        DEBUG = enable;
+    }
+
     private final BindingAdapterDelegate mAdapterDelegate;
     private final RecyclerView.AdapterDataObserver mGroupingResetObserver = new RecyclerView.AdapterDataObserver() {
         @Override

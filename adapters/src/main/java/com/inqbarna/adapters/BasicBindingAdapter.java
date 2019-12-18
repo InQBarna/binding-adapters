@@ -37,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
@@ -152,6 +153,9 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
                     if (deferredOperation.getType() == Type.Keep) {
                         T removedItem = deferredOperation.getData();
                         onRemovingElement(removedItem);
+                    } else if (deferredOperation.getType() == Type.New) {
+                        T notYetInsertedItem = deferredOperation.getData();
+                        releaseItemResources(notYetInsertedItem);
                     }
                     count--;
                 }
@@ -233,6 +237,25 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
                     mData.add(data);
                 }
                 break;
+            }
+        }
+
+        if (mData.size() != targetList.size()) {
+            throw new IllegalStateException(String.format("Something failed updating data, sizes don't match. Data.sz = %d, TargetList.sz = %d", mData.size(), targetList.size()));
+        }
+
+        // Check inputs that didn't end into result (because they where representing same data) and release them
+        // Considerations, both lists are same length, and should actually be the same contents if everyithing from input was used
+        // Thus, an element from target, not matching same position at mData means it's been discarded by Updater
+        final Iterator<? extends T> dataIterator = mData.iterator();
+        final Iterator<? extends T> targetIterator = targetList.iterator();
+        while (dataIterator.hasNext()) {
+            final T itemAtData = dataIterator.next();
+            final T itemFromTarget = targetIterator.next();
+
+            // Intentional use of equality, we wan't to check if it's same instance
+            if (itemAtData != itemFromTarget) {
+                releaseItemResources(itemFromTarget);
             }
         }
     }
@@ -406,7 +429,18 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
         return absPos;
     }
 
+    @CallSuper
     protected void onRemovingElement(T item) {
+        releaseItemResources(item);
+    }
+
+    /**
+     * Override to perform cleanups needed on the provided item. Live connections, Observables, any resource should be
+     * cleared here. The item will be not anymore stored at the adapter at least.
+     *
+     * @param item
+     */
+    protected void releaseItemResources(T item) {
         /* no-op */
     }
 

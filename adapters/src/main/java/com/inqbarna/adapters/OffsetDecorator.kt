@@ -19,6 +19,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.view.View
 import androidx.databinding.BindingAdapter
+import androidx.databinding.adapters.ListenerUtil
 import androidx.recyclerview.widget.RecyclerView
 
 /**
@@ -29,9 +30,12 @@ import androidx.recyclerview.widget.RecyclerView
 /**
  * Method to set OffsetItemDecoration dynamically or inside xml file: (e.g app:addItemOffsets="@{model.offsets}")
  */
-@BindingAdapter("addItemOffsets")
-fun RecyclerView.addOffsetDecoration(offsetProvider: OffsetProvider) {
-    addItemDecoration(OffsetItemDecoration(offsetProvider))
+@BindingAdapter("iqb_recycler_offsets")
+fun RecyclerView.addOffsetDecoration(offsetProvider: OffsetProvider?) {
+    val newProvider = offsetProvider?.let { OffsetItemDecoration(it) }
+    val item = ListenerUtil.trackListener(this, newProvider, R.id.iqb_offsetDecorator)
+    item?.let { removeItemDecoration(it) }
+    newProvider?.let { addItemDecoration(it) }
 }
 
 /**
