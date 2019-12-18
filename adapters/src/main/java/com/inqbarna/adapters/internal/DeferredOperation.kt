@@ -27,6 +27,6 @@ class DeferredOperation<out T> @JvmOverloads constructor(val type: Type, val dat
     }
 
     enum class Type {
-        Keep, Placeholder
+        Keep, Placeholder, New
     }
 }

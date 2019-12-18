@@ -19,10 +19,6 @@ package com.inqbarna.adapters;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListUpdateCallback;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
@@ -38,10 +34,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListUpdateCallback;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
@@ -131,9 +130,6 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
             operations.add(new DeferredOperation<>(Type.Keep, mData.get(i)));
         }
 
-        AtomicBoolean hasMoves = new AtomicBoolean(false);
-
-
         diffResult.dispatchUpdatesTo(new ListUpdateCallback() {
 
             @Override
@@ -152,7 +148,11 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
                 logger.debugMessage("%d Items removed from pos %d", count, position);
                 notifyItemRangeRemoved(addOffsets(position), count);
                 while (count > 0) {
-                    operations.remove(position);
+                    DeferredOperation<T> deferredOperation = operations.remove(position);
+                    if (deferredOperation.getType() == Type.Keep) {
+                        T removedItem = deferredOperation.getData();
+                        onRemovingElement(removedItem);
+                    }
                     count--;
                 }
             }
@@ -161,7 +161,6 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
             public void onMoved(int fromPosition, int toPosition) {
                 logger.debugMessage("Item moved %d --> %d", fromPosition, toPosition);
                 notifyItemMoved(addOffsets(fromPosition), addOffsets(toPosition));
-                hasMoves.set(true);
                 replaceWith(fromPosition, toPosition, null);
             }
 
@@ -172,17 +171,20 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
                     operations.add(toPosition, remove);
                 } else {
                     // This is just a change
-                    operations.remove(fromPosition);
-                    operations.add(toPosition, new DeferredOperation<>(Type.Keep, item));
+                    DeferredOperation<T> deferredOperation = operations.remove(fromPosition);
+                    if (deferredOperation.getType() == Type.Keep) {
+                        onRemovingElement(deferredOperation.getData());
+                    }
+                    operations.add(toPosition, new DeferredOperation<>(Type.New, item));
                 }
             }
 
             @Override
             public void onChanged(int position, int count, Object payload) {
-                logger.debugMessage("%d items changed at position %d", count, position);
-                notifyItemRangeChanged(addOffsets(position), count, payload);
 
                 if (null != payload) {
+                    logger.debugMessage("%d items changed at position %d", count, position);
+                    notifyItemRangeChanged(addOffsets(position), count, payload);
                     List<? extends T> data;
                     if (payload instanceof List) {
                         data = (List<? extends T>) payload;
@@ -202,8 +204,9 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
                         replaceWith(position, position, replacementIter.next());
                         position++;
                     }
+                } else {
+                    logger.debugMessage("[ERROR] Reported callback onChange with %d items, but payload is null", count);
                 }
-
             }
         });
 
@@ -216,6 +219,7 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
             final T operationData = operation.getData();
             switch (operation.getType()) {
                 case Keep:
+                case New:
                     if (null == operationData) {
                         throw new IllegalArgumentException("Operation Data has not been assigned yet!! shouldn't happen here");
                     }
@@ -226,7 +230,7 @@ public class BasicBindingAdapter<T extends TypeMarker> extends BindingAdapter {
                     if (data == null) {
                         data = targetList.get(i);
                     }
-                    mData.add(i, data);
+                    mData.add(data);
                 }
                 break;
             }
