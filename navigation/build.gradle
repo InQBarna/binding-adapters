@@ -1,0 +1,49 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jetbrains.dokka-android'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility rootProject.ext.sourceCompatibility
+        targetCompatibility rootProject.ext.targetCompatibility
+    }
+}
+
+dependencies {
+    implementation libraries.support.v4
+    implementation libraries.kotlin.jdk8
+    implementation libraries.kotlin.coroutinesAndroid
+    implementation libraries.guava.base
+    implementation libraries.jake.timber
+
+    androidTestImplementation(testLibraries.espresso, {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testImplementation testLibraries.junit
+}
+
+ext {
+    libraryArtifactId = "navigation"
+    libraryVersion = '1.0.0'
+}
+
+apply from: "${rootProject.projectDir}/gradle/publish_lib.gradle"
