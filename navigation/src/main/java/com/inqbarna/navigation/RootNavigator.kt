@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import com.inqbarna.navigation.base.AppRoute
 import com.inqbarna.navigation.base.EnhancedNavigator
-import com.inqbarna.navigation.base.NavigationHandler
+import com.inqbarna.navigation.base.NavigationRouter
 import com.inqbarna.navigation.base.Navigator
 import timber.log.Timber
 
@@ -15,7 +15,7 @@ import timber.log.Timber
  */
 class RootNavigator @JvmOverloads constructor(
     private val redirectSupport: NavigationRedirectSupport,
-    initialSteps: List<NavigationHandler> = emptyList(),
+    initialSteps: List<NavigationRouter> = emptyList(),
     private val delegatedNavigator: Navigator? = null,
     responders: List<PermissionResponder> = emptyList()
 ) : EnhancedNavigator, PermissionEnabledRouting {
@@ -50,7 +50,7 @@ class RootNavigator @JvmOverloads constructor(
         val respondsToPermissions: Array<String>
     }
 
-    fun includeNavigationHandler(step: NavigationHandler) {
+    fun includeNavigationHandler(step: NavigationRouter) {
         if (!steps.contains(step)) {
             steps += step
         }

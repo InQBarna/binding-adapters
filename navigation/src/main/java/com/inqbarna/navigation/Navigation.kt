@@ -5,6 +5,9 @@ import android.view.View
 import android.view.ViewParent
 import androidx.fragment.app.Fragment
 import com.inqbarna.navigation.base.Navigator
+import com.inqbarna.navigation.routes.ActivityLauncher
+import com.inqbarna.navigation.routes.FragmentLauncher
+import com.inqbarna.navigation.routes.IntentLauncher
 
 /**
  * @author David García (david.garcia@inqbarna.com)
@@ -31,8 +34,10 @@ object Navigation {
     @JvmStatic
     fun View.findNavigation(): Navigator = searchItemWithTag(View::getNavigation)
 
-    @JvmStatic fun Activity.createIntentLauncher(): IntentLauncher = ActivityLauncher(this)
-    @JvmStatic fun Fragment.createIntentLauncher(): IntentLauncher = FragmentLauncher(this)
+    @JvmStatic fun Activity.createIntentLauncher(): IntentLauncher =
+        ActivityLauncher(this)
+    @JvmStatic fun Fragment.createIntentLauncher(): IntentLauncher =
+        FragmentLauncher(this)
 }
 
 private fun <T> View.searchItemWithTag(getter: View.() -> T?): T {

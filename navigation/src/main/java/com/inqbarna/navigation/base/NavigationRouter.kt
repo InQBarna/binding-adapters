@@ -1,5 +1,5 @@
 package com.inqbarna.navigation.base
 
-interface NavigationHandler : Navigator {
+interface NavigationRouter : Navigator {
     fun canProcessDestination(destination: AppRoute): Boolean
 }
