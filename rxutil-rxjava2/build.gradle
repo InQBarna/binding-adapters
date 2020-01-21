@@ -47,7 +47,7 @@ def grp = LIBRARY_GROUP_ID
 
 ext {
     libraryArtifactId = "rxutil-rxjava2"
-    libraryVersion = '1.0.5'
+    libraryVersion = '1.0.6'
     extraDependencies = [
             [group: grp, name: "common", version: "1.0.4"],
             [group: grp, name: "rxutil-api", version: "1.0.4"]

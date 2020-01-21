@@ -97,7 +97,7 @@ internal class RequestState<T>(val pageSize: Int, private val pageFactory: PageF
         unboundedQueue = LinkedList(initialData)
         mOffset = initialData.size
         if (initialData.isNotEmpty()) {
-            state = Delivering(false)
+            state = Delivering(mOffset < pageSize)
         }
     }
 
