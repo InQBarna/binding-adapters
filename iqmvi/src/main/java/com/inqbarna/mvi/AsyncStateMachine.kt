@@ -16,6 +16,7 @@
 
 package com.inqbarna.mvi
 
+import com.inqbarna.mvi.annotation.ExperimentalLiveUpdates
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,7 +36,10 @@ import kotlin.coroutines.CoroutineContext
 
 private const val DEBUG = false
 
+@ExperimentalLiveUpdates
 interface AsideCommandProcessor<out CommandType, in StateType> {
+
+    @ExperimentalLiveUpdates
     fun setAsideChannel(asideChannelContext: CoroutineContext, channel: SendChannel<CommandType>, stateMachineContext: StateMachineContext<StateType>)
 }
 
@@ -81,6 +85,7 @@ abstract class AsyncStateMachine<in MessageType : Any, in CommandType : Any, Sta
     @ExperimentalCoroutinesApi
     protected abstract suspend fun ProducerScope<OutStateType>.publishStateUpdate(oldState: StateType, newState: StateType)
 
+    @OptIn(ExperimentalLiveUpdates::class)
     private fun ProducerScope<OutStateType>.setupAsideChannel() {
         val channel = Channel<CommandType>()
 
