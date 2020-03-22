@@ -1,10 +1,8 @@
 package com.inqbarna.mvi
 
-import com.inqbarna.navigation.base.AppRoute
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ProducerScope
@@ -26,9 +24,9 @@ interface AsideCommandProcessor<out CommandType, in StateType> {
 }
 
 @ExperimentalCoroutinesApi
-abstract class AsyncStateMachine<in MessageType : Any, in CommandType : Any, StateType : Any, out OutStateType : Any>(
+abstract class AsyncStateMachine<in MessageType : Any, in CommandType : Any, StateType : Any, out OutStateType : Any, out SideEffectType : Any>(
     private val reducer: AsyncStateReducer<CommandType, StateType>,
-    private val messageProcessor: AsyncMessageProcessor<MessageType, CommandType, StateType>
+    private val messageProcessor: AsyncMessageProcessor<MessageType, CommandType, StateType, SideEffectType>
 ) {
 
     var currentState = reducer.initialState
@@ -50,8 +48,8 @@ abstract class AsyncStateMachine<in MessageType : Any, in CommandType : Any, Sta
         }
     }
 
-    val navigation: ReceiveChannel<AppRoute>
-        get() = messageProcessor.navigationChannel()
+    val sideEffects: ReceiveChannel<SideEffectType>
+        get() = messageProcessor.sideEffectsChannel()
 
     @ExperimentalCoroutinesApi
     private suspend fun ProducerScope<OutStateType>.innerPublishResults(nextState: StateType) {
@@ -89,7 +87,6 @@ abstract class AsyncStateMachine<in MessageType : Any, in CommandType : Any, Sta
         }
     }
 
-    @UseExperimental(ObsoleteCoroutinesApi::class)
     @ExperimentalCoroutinesApi
     val CoroutineScope.outputs: ReceiveChannel<OutStateType>
         get() = produce(CoroutineName("states-producer")) {

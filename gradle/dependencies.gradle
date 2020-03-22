@@ -25,7 +25,8 @@ ext {
             shadowsVersion: "3.7.1",
             espressoCoreVersion: "3.1.0",
             runnerVersion: "1.1.0",
-            multidexVersion: "2.0.1"
+            multidexVersion: "2.0.1",
+            lifecycleVersion: "2.2.0"
     ]
 
     libraries = [
@@ -37,7 +38,14 @@ ext {
                     multidex: "com.android.support:multidex:${versions.multidexVersion}"
             ],
             android: [
-                    constraintLayout: "androidx.constraintlayout:constraintlayout:${versions.constraintlayoutVersion}"
+                    constraintLayout: "androidx.constraintlayout:constraintlayout:${versions.constraintlayoutVersion}",
+                    lifecycleKtx: [
+                            reactiveStreams: "androidx.lifecycle:lifecycle-reactivestreams-ktx:${versions.lifecycleVersion}",
+                            savedState: "androidx.lifecycle:lifecycle-viewmodel-savedstate:${versions.lifecycleVersion}",
+                            commonJava8: "androidx.lifecycle:lifecycle-common-java8:${versions.lifecycleVersion}",
+                            viewModel: "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.lifecycleVersion}",
+                            liveData: "androidx.lifecycle:lifecycle-livedata-ktx:${versions.lifecycleVersion}"
+                    ]
             ],
             guava: [
                     base: "com.google.guava:guava:${versions.guavaVersion}",

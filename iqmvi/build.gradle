@@ -32,7 +32,8 @@ dependencies {
     implementation libraries.support.v4
     implementation libraries.kotlin.jdk8
     implementation libraries.kotlin.coroutinesAndroid
-    implementation project(":navigation")
+    implementation libraries.android.lifecycleKtx.viewModel
+
     compileOnly(libraries.jake.timber, {
         exclude group: 'org.jetbrains', module: 'annotations'
     })
