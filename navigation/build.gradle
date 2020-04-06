@@ -61,7 +61,7 @@ dependencies {
 
 ext {
     libraryArtifactId = "navigation"
-    libraryVersion = '1.0.0'
+    libraryVersion = '1.0.0-SNAPSHOT'
 }
 
 apply from: "${rootProject.projectDir}/gradle/publish_lib.gradle"
