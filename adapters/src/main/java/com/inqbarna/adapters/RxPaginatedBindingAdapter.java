@@ -16,14 +16,16 @@
 
 package com.inqbarna.adapters;
 
-import androidx.annotation.Nullable;
-
+import com.google.common.base.Preconditions;
 import com.inqbarna.common.paging.PaginateConfig;
 import com.inqbarna.common.paging.PaginatedAdapterDelegate;
 import com.inqbarna.rxutil.paging.PageFactory;
 import com.inqbarna.rxutil.paging.RxPagingAdapterDelegate;
 import com.inqbarna.rxutil.paging.RxPagingCallback;
 import com.inqbarna.rxutil.paging.RxPagingConfig;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * @author David García (david.garcia@inqbarna.com)
@@ -32,21 +34,33 @@ import com.inqbarna.rxutil.paging.RxPagingConfig;
 
 public class RxPaginatedBindingAdapter<T extends TypeMarker> extends PaginatedBindingAdapter<T> {
 
-    private final RxPagingCallback mRxPagingCallback;
+    private RxPagingCallback mRxPagingCallback;
 
     public RxPaginatedBindingAdapter(
-            RxPagingCallback callback, RxPagingConfig paginateConfig,
+            @NonNull RxPagingCallback callback, @NonNull RxPagingConfig paginateConfig,
             @Nullable PaginatedAdapterDelegate.ProgressHintListener listener) {
         super(paginateConfig, listener);
         mRxPagingCallback = callback;
     }
 
-    public RxPaginatedBindingAdapter(RxPagingCallback callback, RxPagingConfig paginateConfig) {
+    public RxPaginatedBindingAdapter(@NonNull RxPagingCallback callback, @NonNull RxPagingConfig paginateConfig) {
         this(callback, paginateConfig, null);
     }
 
-    public RxPaginatedBindingAdapter(RxPagingCallback callback) {
+    public RxPaginatedBindingAdapter(@NonNull RxPagingCallback callback) {
         this(callback, new RxPagingConfig.Builder().build(), null);
+    }
+
+    public RxPaginatedBindingAdapter() {
+        super(new RxPagingConfig.Builder().build(), null);
+    }
+
+    public void setPaginateConfig(@NonNull RxPagingConfig paginateConfig) {
+        super.setPaginateConfig(paginateConfig);
+    }
+
+    public void setRxCallbacks(@NonNull RxPagingCallback callbacks) {
+        mRxPagingCallback = callbacks;
     }
 
     @Override
@@ -56,6 +70,7 @@ public class RxPaginatedBindingAdapter<T extends TypeMarker> extends PaginatedBi
         if (!(paginateConfig instanceof RxPagingConfig)) {
             throw new IllegalArgumentException("Expected to have created RxPaginationConfig specifics");
         }
+        Preconditions.checkState(mRxPagingCallback != null, "paging callback should be set before connecting the adapter to the RecyclerView");
         return new RxPagingAdapterDelegate<>(this, mRxPagingCallback, (RxPagingConfig) paginateConfig, listener, itemRemovedCallback);
     }
 

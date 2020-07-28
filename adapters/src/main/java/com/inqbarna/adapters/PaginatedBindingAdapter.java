@@ -35,7 +35,7 @@ public class PaginatedBindingAdapter<T extends TypeMarker> extends BindingAdapte
 
     @Nullable private final PaginatedAdapterDelegate.ProgressHintListener mListener;
     private                 PaginatedAdapterDelegate<T>                   mDelegate;
-    private                 PaginateConfig                                mPaginateConfig;
+    private                 PaginateConfig                                paginateConfig;
 
     private final PaginatedAdapterDelegate.ItemRemovedCallback<T> itemRemovedCallback = new PaginatedAdapterDelegate.ItemRemovedCallback<T>() {
         @Override
@@ -54,8 +54,12 @@ public class PaginatedBindingAdapter<T extends TypeMarker> extends BindingAdapte
 
     public PaginatedBindingAdapter(
             PaginateConfig paginateConfig, @Nullable PaginatedAdapterDelegate.ProgressHintListener listener) {
-        mPaginateConfig = paginateConfig;
+        this.paginateConfig = paginateConfig;
         mListener = listener;
+    }
+
+    protected void setPaginateConfig(PaginateConfig paginateConfig) {
+        this.paginateConfig = paginateConfig;
     }
 
     @Override
@@ -110,7 +114,7 @@ public class PaginatedBindingAdapter<T extends TypeMarker> extends BindingAdapte
 
     protected final PaginatedAdapterDelegate<T> getDelegate() {
         if (null == mDelegate) {
-            mDelegate = createDelegate(mPaginateConfig, mListener, itemRemovedCallback);
+            mDelegate = createDelegate(paginateConfig, mListener, itemRemovedCallback);
         }
         return mDelegate;
     }
@@ -118,6 +122,6 @@ public class PaginatedBindingAdapter<T extends TypeMarker> extends BindingAdapte
     protected PaginatedAdapterDelegate<T> createDelegate(
             PaginateConfig paginateConfig, @Nullable PaginatedAdapterDelegate.ProgressHintListener listener,
             PaginatedAdapterDelegate.ItemRemovedCallback<T> itemRemovedCallback) {
-        return new PaginatedAdapterDelegate<T>(this, listener, mPaginateConfig, itemRemovedCallback);
+        return new PaginatedAdapterDelegate<T>(this, listener, this.paginateConfig, itemRemovedCallback);
     }
 }
