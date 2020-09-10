@@ -15,7 +15,6 @@
  */
 package com.inqbarna.adapters
 
-import com.google.common.collect.ImmutableList
 import com.google.common.graph.SuccessorsFunction
 import com.google.common.graph.Traverser
 import java.util.*
@@ -25,6 +24,7 @@ import java.util.*
  * @version 1.0 31/1/17
  */
 
+@Suppress("MemberVisibilityCanBePrivate")
 open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constructor(
         private val dataExtractor: DataExtractor<T>,
         private var factory: TreeItemVMFactory<T, VMType>? = null
@@ -115,8 +115,22 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
         }
     }
 
-    protected fun preOrder(): Iterable<TreeNode<*>> {
-        return Traverser.forTree(ChildrenFunction()).depthFirstPreOrder(ROOT).filter { it !== ROOT }
+    @JvmOverloads
+    protected fun preOrder(startNode: TreeNode<*>? = null, skipClosed: Boolean = false): Iterable<TreeNode<T>> {
+        return inferRootNode(startNode) { root ->
+            Traverser.forTree(ChildrenFunction(skipClosed)).depthFirstPreOrder(root)
+                    .filter { it !== ROOT }
+                    .map { it as TreeNode<T> }
+        } ?: emptyList()
+    }
+
+    @JvmOverloads
+    protected fun postOrder(startNode: TreeNode<*>? = null, skipClosed: Boolean = false): Iterable<TreeNode<T>> {
+        return inferRootNode(startNode) { root ->
+            Traverser.forTree(ChildrenFunction(skipClosed)).depthFirstPostOrder(root)
+                    .filter { it !== ROOT }
+                    .map { it as TreeNode<T> }
+        } ?: emptyList()
     }
 
     protected fun breadthFirstExtractorIterator(node: TreeNode<*>? = null): Iterable<TreeExtractedData<T, VMType>> {
@@ -126,15 +140,20 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
     }
 
     protected fun breadthFirstNodeIterator(node: TreeNode<*>?): Iterable<TreeNode<T>> {
-        val root: TreeNodeImpl<*, *> = when (node) {
-            null -> ROOT
-            !is TreeNodeImpl<*, *> -> return ImmutableList.of()
-            else -> node
-        }
+        return inferRootNode(node) { root ->
+            Traverser.forTree(ChildrenFunction()).breadthFirst(root)
+                    .filter { it !== ROOT }
+                    .map { it as TreeNode<T> }
+        } ?: emptyList()
+    }
 
-        return Traverser.forTree(ChildrenFunction()).breadthFirst(root)
-                .filter { it !== ROOT }
-                .map { it as TreeNode<T> }
+    private inline fun <R : Any> inferRootNode(startNode: TreeNode<*>?, crossinline block: (TreeNodeImpl<*, *>) -> R): R? {
+        val root = when (startNode) {
+            null -> ROOT
+            !is TreeNodeImpl<*, *> -> return null
+            else -> startNode
+        }
+        return block(root)
     }
 
     protected fun findNodeForItem(item: T): TreeNode<T>? {
@@ -149,13 +168,13 @@ open class TreeBindingAdapter<T : Any, VMType : TypeMarker> @JvmOverloads constr
         return null
     }
 
-    private inner class ChildrenFunction : SuccessorsFunction<TreeNodeImpl<*, *>> {
+    private inner class ChildrenFunction(private val skipClosed: Boolean = false) : SuccessorsFunction<TreeNodeImpl<*, *>> {
 
         override fun successors(node: TreeNodeImpl<*, *>): Iterable<TreeNodeImpl<*, *>> {
             return if (node === ROOT) {
                 tree
             } else {
-                node.childNodes
+                if (skipClosed && !node.isOpened) emptyList() else node.childNodes
             }
         }
     }
