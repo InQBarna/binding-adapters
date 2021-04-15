@@ -1,5 +1,8 @@
 // Create the pom configuration:
 def pomConfig = {
+    name = libraryPomName
+    description = libraryPomDescription
+    url = POM_PROJECT_URL
     licenses {
         license {
             name = POM_LICENSE_NAME
@@ -20,19 +23,44 @@ def pomConfig = {
     }
 }
 
+tasks.dokkaHtml.configure {
+    outputDirectory.set(new File(buildDir, "dokka"))
+    moduleName.set(libraryPomName)
+    dokkaSourceSets {
+        configureEach {
+            noAndroidSdkLink.set(false)
+        }
+    }
+}
+
+tasks.dokkaJavadoc.configure {
+    outputDirectory.set(new File(buildDir, "javadoc"))
+    moduleName.set(libraryPomName)
+    dokkaSourceSets {
+        configureEach {
+            noAndroidSdkLink.set(false)
+        }
+    }
+}
+
 task androidSourcesJar(type: Jar) {
     from android.sourceSets.main.java.source
-    archiveClassifier = 'sources'
+    archiveClassifier.set('sources')
 }
 
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//task javadoc(type: Javadoc) {
+//    source = android.sourceSets.main.java.srcDirs
+//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//}
+
+task dokkaJavadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    from(tasks.getByName("dokkaJavadoc").outputDirectory)
+    archiveClassifier.set("javadoc")
 }
 
-task javadocJar(type: Jar, dependsOn: dokka) {
-    from "$buildDir/dokka"
-    archiveClassifier = 'javadoc'
+task dokkaHtmlJar(type: Jar, dependsOn: dokkaHtml) {
+    from(tasks.getByName("dokkaHtml").outputDirectory)
+    archiveClassifier.set("javadoc")
 }
 
 
@@ -46,15 +74,13 @@ def printObj = { o ->
             .join('\n')
 }
 
-if (project.hasProperty('bintrayUser')) {
+if (project.hasProperty('ossUser')) {
 
-    apply plugin: "com.jfrog.bintray"
     apply plugin: 'maven-publish'
+    apply plugin: "signing"
 
     def pubName = "${libraryArtifactId}LibraryPublication"
-
     afterEvaluate {
-
 
         publishing {
             publications {
@@ -64,29 +90,30 @@ if (project.hasProperty('bintrayUser')) {
                     artifactId = libraryArtifactId
                     version = libraryVersion
                     artifact androidSourcesJar
-                    artifact javadocJar
+//                    artifact dokkaJavadocJar
+                    artifact dokkaHtmlJar
 
                     pom(pomConfig)
                 }
             }
-        }
 
-        bintray {
-            user = project.property('bintrayUser')
-            key = project.property('bintrayKey')
-            publications = [pubName]
-            dryRun = false
-            override = false
-            pkg {
-                repo = BINTRAY_REPO
-                name = libraryArtifactId
-                userOrg = BINTRAY_ORGANIZATION
-                licenses = [POM_LICENSE]
-                vcsUrl = POM_REPO_URL
-                version {
-                    name = libraryVersion
+            repositories {
+                maven {
+                    name = "OSSS01"
+                    def snapshotUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                    def stagingUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                    url = version.endsWith("SNAPSHOT") ? snapshotUrl : stagingUrl
+                    credentials {
+                        username = project.property("ossUser")
+                        password = project.property("ossToken")
+                    }
                 }
             }
+        }
+
+        signing {
+            useGpgCmd()
+            sign publishing.publications."$pubName"
         }
     }
 

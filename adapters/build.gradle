@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'org.jetbrains.dokka-android'
+apply plugin: 'org.jetbrains.dokka'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -46,11 +46,13 @@ dependencies {
 def grp = LIBRARY_GROUP_ID
 
 ext {
+    libraryPomName = "IQ Adapters"
+    libraryPomDescription = "Helpfull Base Adapters"
     libraryArtifactId = "adapters"
-    libraryVersion = '1.0.10'
+    libraryVersion = '1.0.11'
     extraDependencies = [
-            [group: grp, name: "common", version: "1.0.4"],
-            [group: grp, name: "rxutil-rxjava2", version: "1.0.6"]
+            [group: grp, name: "common", version: "1.0.5"],
+            [group: grp, name: "rxutil-rxjava2", version: "1.0.7"]
     ]
 }
 
