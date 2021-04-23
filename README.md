@@ -12,4 +12,4 @@ This repo is a collection of utilities that otherwise were being copied around a
 
 ![Common](https://img.shields.io/maven-central/v/com.inqbarna.util/common?label=common)
 ![RxUtilApi](https://img.shields.io/maven-central/v/com.inqbarna.util/rxutil-api?label=rxutil-api)
-[![RxUtilRxjava2](https://img.shields.io/maven-central/v/com.inqbarna.util/rxutil-rxjava2?label=rxutil-rxjava2)
+![RxUtilRxjava2](https://img.shields.io/maven-central/v/com.inqbarna.util/rxutil-rxjava2?label=rxutil-rxjava2)
