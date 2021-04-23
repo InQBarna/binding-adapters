@@ -6,9 +6,10 @@ This repo is a collection of utilities that otherwise were being copied around a
 * PaginatedBindingAdapters that combines previous, and also gives RxJava2 pagination support
 
 ##### `adapters` is top level package (this should be the only include)
-[![Adapters](https://img.shields.io/badge/dynamic/json.svg?color=blue&label=adapters&query=name&url=https%3A%2F%2Fapi.bintray.com%2Fpackages%2Finqbarna-oss%2Futilities%2Fadapters%2Fversions%2F_latest)](https://bintray.com/inqbarna-oss/utilities/adapters/_latestVersion)
+![Adapters](https://img.shields.io/maven-central/v/com.inqbarna.util/adapters?label=adapters)
 
 ##### Other dependencies are `common` `rxutil-api` and `rxutil-rxjava2`
-[![Common](https://img.shields.io/badge/dynamic/json.svg?color=blue&label=common&query=name&url=https%3A%2F%2Fapi.bintray.com%2Fpackages%2Finqbarna-oss%2Futilities%2Fcommon%2Fversions%2F_latest)](https://bintray.com/inqbarna-oss/utilities/common/_latestVersion)
-[![RxUtilApi](https://img.shields.io/badge/dynamic/json.svg?color=blue&label=rxutil-api&query=name&url=https%3A%2F%2Fapi.bintray.com%2Fpackages%2Finqbarna-oss%2Futilities%2Frxutil-api%2Fversions%2F_latest)](https://bintray.com/inqbarna-oss/utilities/rxutil-api/_latestVersion)
-[![RxUtilRxjava2](https://img.shields.io/badge/dynamic/json.svg?color=blue&label=rxutil-rxjava2&query=name&url=https%3A%2F%2Fapi.bintray.com%2Fpackages%2Finqbarna-oss%2Futilities%2Frxutil-rxjava2%2Fversions%2F_latest)](https://bintray.com/inqbarna-oss/utilities/rxutil-rxjava2/_latestVersion)
+
+![Common](https://img.shields.io/maven-central/v/com.inqbarna.util/common?label=common)
+![RxUtilApi](https://img.shields.io/maven-central/v/com.inqbarna.util/rxutil-api?label=rxutil-api)
+[![RxUtilRxjava2](https://img.shields.io/maven-central/v/com.inqbarna.util/rxutil-rxjava2?label=rxutil-rxjava2)
