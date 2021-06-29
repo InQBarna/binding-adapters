@@ -41,7 +41,7 @@ ext {
     libraryPomName = "Common Utils"
     libraryPomDescription = "Shared common utility artifact"
     libraryArtifactId = "common"
-    libraryVersion = '1.0.5'
+    libraryVersion = '1.1.0'
 }
 
 apply from: "${rootProject.projectDir}/gradle/publish_lib.gradle"

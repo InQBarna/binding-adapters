@@ -32,7 +32,6 @@ dependencies {
     api project(':common')
     api libraries.support.recyclerView
     implementation libraries.reactiveStreams
-    implementation libraries.kotlin.jdk8
     androidTestImplementation(testLibraries.espresso, {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -45,9 +44,9 @@ ext {
     libraryPomName = "Reactive extensions API"
     libraryPomDescription = "Reactive extensions API"
     libraryArtifactId = "rxutil-api"
-    libraryVersion = '1.0.5'
+    libraryVersion = '1.1.0'
     extraDependencies = [
-            [group: grp, name: "common", version: "1.0.5"]
+            [group: grp, name: "common", version: "1.1.0"]
     ]
 }
 

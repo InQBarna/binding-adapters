@@ -38,7 +38,6 @@ dependencies {
     compileOnly (libraries.jake.timber) {
         exclude group: "org.jetbrains", module: "annotations"
     }
-    implementation libraries.kotlin.jdk8
     implementation libraries.support.v4
     implementation libraries.support.recyclerView
 }
@@ -49,10 +48,10 @@ ext {
     libraryPomName = "IQ Adapters"
     libraryPomDescription = "Helpfull Base Adapters"
     libraryArtifactId = "adapters"
-    libraryVersion = '1.0.11'
+    libraryVersion = '1.1.0'
     extraDependencies = [
-            [group: grp, name: "common", version: "1.0.5"],
-            [group: grp, name: "rxutil-rxjava2", version: "1.0.7"]
+            [group: grp, name: "common", version: "1.1.0"],
+            [group: grp, name: "rxutil-rxjava2", version: "1.1.0"]
     ]
 }
 
