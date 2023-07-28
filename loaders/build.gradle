@@ -3,7 +3,7 @@ apply plugin: "kotlin-android"
 apply plugin: "org.jetbrains.dokka"
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
@@ -19,6 +19,7 @@ android {
         sourceCompatibility rootProject.ext.sourceCompatibility
         targetCompatibility rootProject.ext.targetCompatibility
     }
+    namespace 'com.inqbarna.iqloaders'
 }
 
 dependencies {

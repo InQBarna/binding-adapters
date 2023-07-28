@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt' // for databinding which gets automatically inserted in annotationProcessor
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
 
     dataBinding {
         enabled true
@@ -25,6 +25,7 @@ android {
         sourceCompatibility rootProject.ext.sourceCompatibility
         targetCompatibility rootProject.ext.targetCompatibility
     }
+    namespace 'com.inqbarna.widgets'
 }
 
 dependencies {
